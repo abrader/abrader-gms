@@ -42,6 +42,15 @@ module Puppet
       end
     end
 
+    newparam(:server_url) do
+      desc 'The URL path to the Gitlab server.'
+      validate do |value|
+        unless value =~ /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+          raise(Puppet::Error, "Git server URL must be fully qualified, not '#{value}'")
+        end
+      end
+    end
+
     autorequire(:file) do
       self[:path]if self[:path] and Pathname.new(self[:path]).absolute?
     end

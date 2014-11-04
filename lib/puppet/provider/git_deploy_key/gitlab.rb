@@ -4,6 +4,11 @@ require 'json'
 
 Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
 
+  def git_server
+    return resource[:server_url].strip unless resource[:server_url].nil?
+    return 'https://gitlab.com'
+  end
+
   def create_url(action,url_params)
     if action =~ /post/i
       req = req = Net::HTTP::Post.new(url_params)
@@ -24,15 +29,19 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
     project_id = get_project_id
 
     sshkey_hash = Hash.new
-    uri = URI.parse("https://gitlab.com/api/v3/projects/#{project_id}/keys")
+    uri = URI.parse("#{git_server}/api/v3/projects/#{project_id}/keys")
     http = Net::HTTP.new(uri.host, uri.port)
 
-    if uri.port = 443
+    if uri.port == 443
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    else
+      http.use_ssl = false
     end
 
     req = create_url('GET', uri.request_uri)
+
+    #http.set_debug_output($stdout)
 
     response = http.request(req)
 
@@ -59,12 +68,14 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
 
     project_name = resource[:project_name].strip.sub('/','%2F')
 
-    uri = URI.parse("https://gitlab.com/api/v3/projects/#{project_name}")
+    uri = URI.parse("#{git_server}/api/v3/projects/#{project_name}")
     http = Net::HTTP.new(uri.host, uri.port)
 
-    if uri.port = 443
+    if uri.port == 443
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    else
+      http.use_ssl = false
     end
 
     req = create_url('GET', uri.request_uri)
@@ -81,12 +92,14 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
 
     sshkey_hash = Hash.new
 
-    uri = URI.parse("https://gitlab.com/api/v3/projects/#{project_id}/keys")
+    uri = URI.parse("#{git_server}/api/v3/projects/#{project_id}/keys")
     http = Net::HTTP.new(uri.host, uri.port)
 
-    if uri.port = 443
+    if uri.port == 443
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    else
+      http.use_ssl = false
     end
 
     req = create_url('GET', uri.request_uri)
@@ -111,12 +124,14 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
   def create
     project_id = get_project_id
 
-    uri = URI.parse("https://gitlab.com/api/v3/projects/#{project_id}/keys")
+    uri = URI.parse("#{git_server}/api/v3/projects/#{project_id}/keys")
     http = Net::HTTP.new(uri.host, uri.port)
 
-    if uri.port = 443
+    if uri.port == 443
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    else
+      http.use_ssl = false
     end
 
     #http.set_debug_output($stdout)
@@ -144,13 +159,15 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
     key_id = get_key_id
 
     unless key_id.nil?
-      uri = URI.parse("https://gitlab.com/api/v3/projects/#{project_id}/keys/#{key_id}")
+      uri = URI.parse("#{git_server}/api/v3/projects/#{project_id}/keys/#{key_id}")
 
       http = Net::HTTP.new(uri.host, uri.port)
 
-      if uri.port = 443
+      if uri.port == 443
         http.use_ssl = true
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      else
+        http.use_ssl = false
       end
 
       #http.set_debug_output($stdout)
