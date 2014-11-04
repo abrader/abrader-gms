@@ -1,2 +1,2 @@
 .*.swp
-/manifests/init.pp
+manifests/init.pp
