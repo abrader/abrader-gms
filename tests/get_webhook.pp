@@ -1,29 +1,29 @@
-class gms {
+class gms:git_webhook {
 
-  git_deploy_key { 'abrader_macbookpro_key_gitlab.com' :
+  git_webhook { 'abrader_macbookpro_key_gitlab.com' :
     ensure       => present,
     name         => 'abrader_macbookpro_key',
-    path         => '/root/.ssh/id_rsa.pub',
+    webhook_url  => 'http://master.puppetlabs.vm/payload',
     token        => 'Y5E8vXdjhTu6aDp3YRWs',
     project_id   => 110384,
     server_url   => 'https://gitlab.com',
   }
-  
-  git_deploy_key { 'abrader_macbookpro_key_glsrv.puppetlabs.vm' :
+
+  git_webhook { 'abrader_macbookpro_key_glsrv.puppetlabs.vm' :
     ensure       => present,
     name         => 'abrader_macbookpro_key',
-    path         => '/home/abrader/.ssh/id_rsa.pub',
+    webhook_url  => 'http://master.puppetlabs.vm/payload',
     token        => 'NcuHJ7MLkJnx2DZJ5MKn',
     project_name => 'abrader/control',
     server_url   => 'http://glsrv.puppetlabs.vm',
   }
-  
-  git_deploy_key { 'should_be_removed' :
+
+  git_webhook { 'should_be_removed' :
     ensure       => absent,
-    path         => '/home/abrader/.ssh/id_rsa.pub',
+    webhook_url  => 'http://master.puppetlabs.vm/payload',
     token        => 'NcuHJ7MLkJnx2DZJ5MKn',
     project_name => 'abrader/control',
     server_url   => 'http://glsrv.puppetlabs.vm',
   }
-  
+
 }
