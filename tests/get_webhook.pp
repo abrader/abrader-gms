@@ -1,6 +1,6 @@
 class gms:git_webhook {
 
-  git_webhook { 'abrader_macbookpro_key_gitlab.com' :
+  git_webhook { 'my_awesome_webhook' :
     ensure       => present,
     name         => 'abrader_macbookpro_key',
     webhook_url  => 'http://master.puppetlabs.vm/payload',
@@ -9,7 +9,7 @@ class gms:git_webhook {
     server_url   => 'https://gitlab.com',
   }
 
-  git_webhook { 'abrader_macbookpro_key_glsrv.puppetlabs.vm' :
+  git_webhook { 'my_awesome_webhook' :
     ensure       => present,
     name         => 'abrader_macbookpro_key',
     webhook_url  => 'http://master.puppetlabs.vm/payload',
