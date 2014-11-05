@@ -1,7 +1,8 @@
 module Puppet
   newtype(:git_deploy_key) do
 
-    @doc = "TODO"
+    @doc = %q{A deploy key is an SSH key that is stored on your server and grants access to a single GitHub repository.  This key is attached directly to the repository instead of to a personal user account.  Anyone with access to the repository and server has the ability to deploy the project.  It is also beneficial for users since they are not required to change their local SSH settings.
+    }
 
     ensurable do
       defaultvalues
@@ -9,11 +10,11 @@ module Puppet
     end
 
     newparam(:name, :namevar => true) do
-      desc 'The title of the key that will be provided to the Git management system provider chosen.'
+      desc 'A unique title for the key that will be provided to the prefered Git management system.'
     end
 
     newparam(:path) do
-      desc 'The file Puppet will ensure is used with the Git management system provider chosen.'
+      desc 'The file Puppet will ensure is provided to the prefered Git management system.'
       validate do |value|
         unless (Puppet.features.posix? and value =~ /^\//) or (Puppet.features.microsoft_windows? and (value =~ /^.:\// or value =~ /^\/\/[^\/]+\/[^\/]+/))
           raise(Puppet::Error, "File paths must be fully qualified, not '#{value}'")
@@ -22,7 +23,7 @@ module Puppet
     end
 
     newparam(:token) do
-      desc 'The private token needed to manipulate the Git management system provider chosen.'
+      desc 'The private token require to manipulate the Git management system provider chosen.'
       munge do |value|
         String(value)
       end
@@ -43,7 +44,7 @@ module Puppet
     end
 
     newparam(:server_url) do
-      desc 'The URL path to the Gitlab server.'
+      desc 'The URL path to the Git management system server.'
       validate do |value|
         unless value =~ /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
           raise(Puppet::Error, "Git server URL must be fully qualified, not '#{value}'")
