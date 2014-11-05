@@ -6,7 +6,7 @@ class gms(
   $user_id      = <user id>,
   $access_level = <GUEST = 10, REPORTER = 20, DEVELOPER = 30, MASTER = 40, OWNER = 50>,
   $sshkey_title = <title for test ssh key>,
-  $server_url   = <URL for Git management system>,
+  $server_url   = <URL for Git management system # i.e., https://gitlab.com>,
 ) {
 
   git_deploy_key { 'unique_key_name' :
