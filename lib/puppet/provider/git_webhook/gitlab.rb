@@ -82,9 +82,14 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
 
     #http.set_debug_output($stdout)
 
-    response = http.request(req)
+    begin
+      response = http.request(req)
+      return JSON.parse(response.body)['id'].to_i 
+    rescue Exception => e
+      fail(Puppet::Error, "gitlab_webhook: #{e.message}")
+      return nil
+    end
 
-    return JSON.parse(response.body)['id'].to_i 
   end
 
   def get_webhook_id
