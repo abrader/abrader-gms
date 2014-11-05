@@ -1,4 +1,4 @@
-class gms::get_deploy_key {
+class gms::git_deploy_key {
 
   git_deploy_key { 'abrader_macbookpro_key_gitlab.com' :
     ensure       => present,
