@@ -6,7 +6,6 @@ class gms {
     path         => '/root/.ssh/id_rsa.pub',
     token        => 'Y5E8vXdjhTu6aDp3YRWs',
     project_id   => 110384,
-    project_name => '',
     server_url   => 'https://gitlab.com',
   }
   
