@@ -1,4 +1,4 @@
-class gms:git_webhook {
+class gms::git_webhook {
 
   git_webhook { 'abrader_macbookpro_key_gitlab.com' :
     ensure       => present,
