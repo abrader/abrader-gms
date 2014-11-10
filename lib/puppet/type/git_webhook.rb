@@ -13,6 +13,21 @@ module Puppet
       desc 'A unique title for the key that will be provided to the prefered Git management system.'
     end
 
+    newparam(:system) do
+      desc 'Two options here depending on the git management system (Github or Gitlab)'
+      newvalues('Github', 'Gitlab')
+      validate do |value|
+        String(value)
+        if value =~ /gitlab/i
+          resource[:provider] = :gitlab
+        elsif value =~ /stash/i
+          resource[:provider] = :stash
+        else
+          resource[:provider] = :github
+        end
+      end
+    end
+
     newparam(:webhook_url) do
       desc 'TODO.'
       validate do |value|

@@ -11,7 +11,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
 
   def create_url(action,url_params)
     if action =~ /post/i
-      req = req = Net::HTTP::Post.new(url_params)
+      req = Net::HTTP::Post.new(url_params)
     elsif action =~ /put/i
       req = Net::HTTP::Put.new(url_params)
     elsif action =~ /delete/i
