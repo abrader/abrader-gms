@@ -3,6 +3,9 @@ require 'net/http'
 require 'json'
 
 Puppet::Type.type(:git_webhook).provide(:github) do
+  
+  defaultfor :github => :exist
+  defaultfor :feature => :posix
 
   def git_server
     return resource[:server_url].strip unless resource[:server_url].nil?
