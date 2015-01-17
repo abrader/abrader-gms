@@ -1,0 +1,97 @@
+{
+  "name": "abrader-gms",
+  "version": "0.0.4",
+  "author": "Andrew Brader",
+  "summary": "Git Management Systems API Types & Providers",
+  "license": "Apache-2.0",
+  "source": "https://github.com/abrader/abrader-gms",
+  "project_page": "https://github.com/abrader/abrader-gms",
+  "issues_url": "https://github.com/abrader/abrader-gms/issues",
+  "operatingsystem_support": [
+     {
+       "operatingsystem": "RedHat",
+       "operatingsystemrelease": [
+         "5",
+         "6",
+         "7"
+       ]
+     },
+     {
+       "operatingsystem": "CentOS",
+       "operatingsystemrelease": [
+         "5",
+         "6",
+         "7"
+       ]
+     },
+     {
+       "operatingsystem": "OracleLinux",
+       "operatingsystemrelease": [
+         "5",
+         "6",
+         "7"
+       ]
+     },
+     {
+       "operatingsystem": "Scientific",
+       "operatingsystemrelease": [
+         "5",
+         "6",
+         "7"
+       ]
+     },
+     {
+       "operatingsystem": "SLES",
+       "operatingsystemrelease": [
+         "10 SP4",
+         "11 SP1",
+         "12"
+       ]
+     },
+     {
+       "operatingsystem": "Debian",
+       "operatingsystemrelease": [
+         "6",
+         "7"
+       ]
+     },
+     {
+       "operatingsystem": "Ubuntu",
+       "operatingsystemrelease": [
+         "10.04",
+         "12.04",
+         "14.04"
+       ]
+     },
+     {
+       "operatingsystem": "Solaris",
+       "operatingsystemrelease": [
+         "10",
+         "11"
+       ]
+     },
+     {
+       "operatingsystem": "AIX",
+       "operatingsystemrelease": [
+         "6.1",
+         "7.1"
+       ]
+     }
+   ],
+   "requirements": [
+       {
+         "name": "pe",
+         "version_requirement": ">= 3.2.0 < 3.4.0"
+       },
+       {
+         "name": "puppet",
+         "version_requirement": "3.x"
+       }
+     ],
+   "dependencies": [
+     {
+       "name": "puppetlabs/stdlib",
+       "version_requirement": ">= 3.2.0"
+     }
+   ]
+}
