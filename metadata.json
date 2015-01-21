@@ -7,6 +7,7 @@
   "source": "https://github.com/abrader/abrader-gms",
   "project_page": "https://github.com/abrader/abrader-gms",
   "issues_url": "https://github.com/abrader/abrader-gms/issues",
+  "tags": ["git", "github", "gitlab", "stash", "gms"]
   "operatingsystem_support": [
      {
        "operatingsystem": "RedHat",
