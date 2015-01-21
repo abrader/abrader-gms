@@ -73,7 +73,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
     return resource[:project_id].to_i unless resource[:project_id].nil?
 
     if resource[:project_name].nil?
-      raise(Puppet::Error, "gitlab_deploy_key: Must provide at least one of the following attributes: project_id or project_name")
+      raise(Puppet::Error, "git_deploy_key: Must provide at least one of the following attributes: project_id or project_name")
     end
 
     project_name = resource[:project_name].strip.sub('/','%2F')
@@ -84,7 +84,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
       response = api_call('GET', url)
       return JSON.parse(response.body)['id'].to_i 
     rescue Exception => e
-      fail(Puppet::Error, "gitlab_deploy_key: #{e.message}")
+      fail(Puppet::Error, "git_deploy_key: #{e.message}")
       return nil
     end
 
@@ -125,7 +125,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
       if (response.class == Net::HTTPCreated)
         return true
       else
-        raise(Puppet::Error, "gitlab_deploy_key: #{response.inspect}")
+        raise(Puppet::Error, "git_deploy_key: #{response.inspect}")
       end
     rescue Exception => e
       raise(Puppet::Error, e.message)
@@ -146,7 +146,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
         if (response.class == Net::HTTPOK)
           return true
         else
-          raise(Puppet::Error, "gitlab_deploy_key: #{response.inspect}")
+          raise(Puppet::Error, "git_deploy_key: #{response.inspect}")
         end
       rescue Exception => e
         raise(Puppet::Error, e.message)

@@ -6,7 +6,7 @@ As of right now this repository only covers the following GMS functionality:
 
 |Function|GitHub|GitLab|Stash|
 |--------|------|------|-----|
-|git_deploy_key|-|X|-|
+|git_deploy_key|X|X|-|
 |git_webhook|X|X|-|
 
 Of course it is our intent to provide more coverage of the respective APIs in the future.  Please feel free to submit PRs as well.
