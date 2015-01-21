@@ -61,6 +61,18 @@ Both http & https URLs are acceptable.
 server_url   => 'http://my.internal.gms.server.example.com',
 ```
 
+#### provider
+
+The Git Management System you are currently using in reference to the webhook you are managing.  Currently only GitHub and GitLab are supported.
+
+```puppet
+provider     => 'github',
+```
+or
+```puppet
+provider     => 'gitlab',
+```
+
 ### Optional parameters
 
 #### name
