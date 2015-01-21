@@ -82,7 +82,7 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
     return nil
   end
 
-def create
+  def create
     url = "#{git_server}/repos/#{resource[:project_name].strip}/keys"
 
     begin
