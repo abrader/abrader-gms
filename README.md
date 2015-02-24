@@ -193,7 +193,7 @@ issue_events => true,
 ```
 
 #### disable\_ssl_verify
-Boolean value for disabling SSL verification for this webhook. **Note: GitHub only**
+Boolean value for disabling SSL verification for this webhook. **NOTE: GitHub only**
 
 ```puppet
 disable_ssl_verify => true,
