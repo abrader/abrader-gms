@@ -77,6 +77,12 @@ module Puppet
       
       defaultto false
     end 
+    
+    newparam(:disable_ssl_verify, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+      desc 'Boolean value for disabling SSL verification for this webhook. Note: GitHub only'
+      
+      defaultto false
+    end
 
     newparam(:server_url) do
       desc 'The URL path to the Git management system server.'

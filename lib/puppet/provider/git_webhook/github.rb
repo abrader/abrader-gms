@@ -49,9 +49,6 @@ Puppet::Type.type(:git_webhook).provide(:github) do
   end
 
   def exists?
-    #project_id = get_project_id
-    #puts project_id
-    
     webhook_hash = Hash.new
     url = "#{git_server}/repos/#{resource[:project_name].strip}/hooks"
 
@@ -121,7 +118,17 @@ Puppet::Type.type(:git_webhook).provide(:github) do
     url = "#{git_server}/repos/#{resource[:project_name].strip}/hooks"
 
     begin
-      response = api_call('POST', url, {'name' => 'web', 'active' => true, 'config' => { 'url' => resource[:webhook_url].strip, 'content_type' => 'json' }})
+      config_opts = { 'url' => resource[:webhook_url].strip, 'content_type' => 'json' }
+      
+      if resource.disable_ssl_verify?
+        if resource[:disable_ssl_verify] == true
+          config_opts['insecure_ssl'] = 1
+        else
+          config_opts['insecure_ssl'] = 0
+        end
+      end
+      
+      response = api_call('POST', url, { 'name' => 'web', 'active' => true, 'config' => config_opts })
 
       if (response.class == Net::HTTPCreated)
         return true
