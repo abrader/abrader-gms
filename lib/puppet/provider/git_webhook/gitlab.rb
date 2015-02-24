@@ -35,9 +35,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
       req = Net::HTTP::Get.new(uri.request_uri)
     end
 
-    #req.initialize_http_header({'Accept' => 'application/vnd.github.v3+json', 'User-Agent' => 'puppet-gms'})
     req.set_content_type('application/json')
-    #req.add_field('Authorization', "token #{resource[:token].strip}")
     req.add_field('PRIVATE-TOKEN', resource[:token])
 
     if data
@@ -56,6 +54,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     response = api_call('GET', url)
 
     webhook_json = JSON.parse(response.body)
+    
     webhook_json.each do |child|
       webhook_hash[child['url']] = child['id']
     end
@@ -118,9 +117,23 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     project_id = get_project_id
 
     url = "#{git_server}/api/v3/projects/#{project_id}/hooks"
-
+    
     begin
-      response = api_call('POST', url, {'url' => resource[:webhook_url].strip})
+      opts = { 'url' => resource[:webhook_url].strip }
+      
+      if resource.merge_request_events?
+        opts['merge_requests_events'] = resource[:merge_request_events]
+      end
+
+      if resource.tag_push_events?
+        opts['tag_push_events'] = resource[:tag_push_events]
+      end
+      
+      if resource.issue_events?
+        opts['issues_events'] = resource[:issue_events]
+      end
+      
+      response = api_call('POST', url, opts)
 
       if (response.class == Net::HTTPCreated)
         return true

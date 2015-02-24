@@ -1,3 +1,5 @@
+require 'puppet/parameter/boolean'
+
 module Puppet
   newtype(:git_webhook) do
 
@@ -57,6 +59,24 @@ module Puppet
         String(value)
       end
     end
+    
+    newparam(:merge_request_events, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+      desc 'The URL in the webhook_url parameter will be triggered when a merge request is created. NOTE: GitLab only'
+     
+      defaultto false
+    end
+    
+    newparam(:tag_push_events, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+      desc 'The URL in the webhook_url parameter will be triggered when a tag push event occurs. NOTE: GitLab only'
+      
+      defaultto false
+    end
+    
+    newparam(:issue_events, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+      desc 'The URL in the webhook_url parameter will be triggered when an issue event occurs. NOTE: GitLab only.'
+      
+      defaultto false
+    end 
 
     newparam(:server_url) do
       desc 'The URL path to the Git management system server.'
