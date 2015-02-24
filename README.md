@@ -212,4 +212,24 @@ git_webhook { 'web_post_receive_webhook' :
 }
 ```
 
+## Limited use access tokens (GitHub only)
+
+By heading over the following link:
+
+[Create a GitHub Access Token](https://github.com/settings/tokens/new)
+
+You should see a screen that resembles something like the following image:
+
+![alt text](https://github.com/abrader/abrader-gms/raw/master/github_new_token.png "GitHub Access Token")
+
+By highlighting **only** the following options:
+
+* write:repo_hook
+* read:repo_hook
+* admin:repo_hook
+
+You are limiting this token to only be able to manage webhooks.  This may be very beneficial to you if the current tokens available to you entitle too much access. Ultimately, you are puppetizing webhook creation, limiting scope of the token capability only makes sense.
+
+
+
 --
