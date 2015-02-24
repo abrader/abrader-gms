@@ -87,7 +87,8 @@ module Puppet
     newparam(:server_url) do
       desc 'The URL path to the Git management system server.'
       validate do |value|
-        unless value =~ /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+        #unless value =~ /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+        unless value =~ /^(https?:\/\/).*:?.*\/?$/
           raise(Puppet::Error, "Git server URL must be fully qualified, not '#{value}'")
         end
       end
