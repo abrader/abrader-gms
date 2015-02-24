@@ -169,6 +169,36 @@ Both http & https URLs are acceptable.
 server_url   => 'http://my.internal.gms.server.example.com',
 ```
 
+### Optional Parameters
+
+#### merge\_request_events
+The URL in the webhook_url parameter will be triggered when a merge requests event occurs. **NOTE: GitLab only**
+
+```puppet
+merge_request_events => true,
+```
+
+#### tag\_push_events
+The URL in the webhook_url parameter will be triggered when a tag push event occurs. **NOTE: GitLab only**
+
+```puppet
+tag_push_events => true,
+```
+
+#### issue_events
+The URL in the webhook_url parameter will be triggered when an issues event occurs. **NOTE: GitLab only**
+
+```puppet
+issue_events => true,
+```
+
+#### disable\_ssl_verify
+Boolean value for disabling SSL verification for this webhook. **Note: GitHub only**
+
+```puppet
+disable_ssl_verify => true,
+```
+
 ### An example
 
 ```puppet
