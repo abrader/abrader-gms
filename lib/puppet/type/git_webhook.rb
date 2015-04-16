@@ -33,7 +33,7 @@ module Puppet
     newparam(:webhook_url) do
       desc 'TODO.'
       validate do |value|
-        unless value =~ /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*:?.*\/?$/
+        unless value =~ /^(https?:\/\/)?(\S*\:\S*\@)?(\S*)\.(\S*)\.(\w*):?(\d*)\/?(\S*)$/
           raise(Puppet::Error, "Git webhook URL must be fully qualified, not '#{value}'")
         end
       end
