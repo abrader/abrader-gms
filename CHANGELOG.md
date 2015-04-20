@@ -1,7 +1,7 @@
-##2015-04-20 - Release 0.0.7
+##2015-04-20 - Release 0.0.8
 ###Summary
 
-This release is for the purpose of easing the regex on the git_webhook type so Basic HTTP Auth included with an URL is an accepted parameter.
+This release is because I simply missed the updated CHANGELOG when packaging the previous module release.
 
 - - -
 
