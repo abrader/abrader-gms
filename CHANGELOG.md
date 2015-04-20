@@ -1,3 +1,10 @@
+##2015-04-20 - Release 0.0.7
+###Summary
+
+This release is for the purpose of easing the regex on the git_webhook type so Basic HTTP Auth included with an URL is an accepted parameter.
+
+- - -
+
 ##2015-02-24 - Release 0.0.6
 ###Summary
 
@@ -12,3 +19,5 @@ The [README](https://github.com/abrader/abrader-gms/blob/master/README.md) has b
   - `issue_events`
 - New parameters - `GitHub`
   - `disable_ssl_verify`
+
+- - -
