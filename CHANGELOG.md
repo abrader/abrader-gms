@@ -1,3 +1,10 @@
+##2015-06-12 - Release 0.0.9
+###Summary
+
+v0.0.8 Tarball on Puppet Forge had bad permissions for the Webhook provider. Thanks to @bhechinger for the heads up.
+
+- - -
+
 ##2015-04-20 - Release 0.0.8
 ###Summary
 
