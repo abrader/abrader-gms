@@ -9,7 +9,7 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
 
   def git_server
     return resource[:server_url].strip unless resource[:server_url].nil?
-    return 'https://gitlab.com'
+    return 'https://api.github.com'
   end
 
   def api_call(action,url,data = nil)
