@@ -1,7 +1,7 @@
 require 'puppet/parameter/boolean'
 
 module Puppet
-  newtype(:git_webhook) do
+  Puppet::Type.newtype(:git_webhook) do 
 
     @doc = %q{TODO
     }
@@ -33,7 +33,7 @@ module Puppet
     newparam(:webhook_url) do
       desc 'TODO.'
       validate do |value|
-        unless value =~ /^(https?:\/\/)?(\S*\:\S*\@)?(\S*)\.(\S*)\.(\w*):?(\d*)\/?(\S*)$/
+        unless value =~ /^(https?:\/\/)?(\S*\:\S*\@)?(\S*)\.?(\S*)\.?(\w*):?(\d*)\/?(\S*)$/
           raise(Puppet::Error, "Git webhook URL must be fully qualified, not '#{value}'")
         end
       end
@@ -41,6 +41,20 @@ module Puppet
 
     newparam(:token) do
       desc 'The private token require to manipulate the Git management system provider chosen.'
+      munge do |value|
+        String(value)
+      end
+    end
+    
+    newparam(:username) do
+      desc 'The username to be used for authentication vs a token. NOTE: Stash & Bitbucket only.'
+      munge do |value|
+        String(value)
+      end
+    end
+    
+    newparam(:password) do
+      desc 'The password to be used for authentication vs a token.  Note: Stash & BitBucket only.'
       munge do |value|
         String(value)
       end
