@@ -74,6 +74,27 @@ module Puppet
       end
     end
     
+    newparam(:repo_name) do
+      desc 'The name of the repository associated with the webhook. NOTE: Stash only.'
+      munge do |value|
+        String(value)
+      end
+    end
+    
+    newparam(:hook_exec) do
+      desc 'The absolute path to the exectuable triggered when a commit has been made to the respository.  NOTE: Stash only.'
+      munge do |value|
+        String(value)
+      end
+    end
+
+    newparam(:hook_exec_params) do
+      desc 'The parameters to be passed along side of the executable that will be triggered when a commit has been made to the repository.  NOTE: Stash only.'
+      munge do |value|
+        String(value)
+      end
+    end
+    
     newparam(:merge_request_events, :boolean => true, :parent => Puppet::Parameter::Boolean) do
       desc 'The URL in the webhook_url parameter will be triggered when a merge request is created. NOTE: GitLab only'
      

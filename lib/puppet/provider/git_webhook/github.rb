@@ -7,7 +7,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
   defaultfor :github => :exist
   defaultfor :feature => :posix
 
-  def git_server
+  def gms_server
     return resource[:server_url].strip unless resource[:server_url].nil?
     return 'https://api.github.com'
   end
@@ -24,7 +24,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
       http.use_ssl = false
     end
 
-    #http.set_debug_output($stdout)
+    Puppet.debug(http.set_debug_output($stdout))
 
     if action =~ /post/i
       req = Net::HTTP::Post.new(uri.request_uri)
@@ -50,7 +50,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
 
   def exists?
     webhook_hash = Hash.new
-    url = "#{git_server}/repos/#{resource[:project_name].strip}/hooks"
+    url = "#{gms_server}/repos/#{resource[:project_name].strip}/hooks"
 
     response = api_call('GET', url)
     webhook_json = JSON.parse(response.body)
@@ -77,7 +77,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
 
     project_name = resource[:project_name].strip
 
-    url = "#{git_server}/repos/#{project_name}"
+    url = "#{gms_server}/repos/#{project_name}"
 
     begin
       response = api_call('GET', url)
@@ -94,7 +94,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
 
     webhook_hash = Hash.new
 
-    url = "#{git_server}/repos/#{resource[:project_name]}/hooks"
+    url = "#{gms_server}/repos/#{resource[:project_name]}/hooks"
 
     response = api_call('GET', url)
 
@@ -115,7 +115,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
   end
     
   def create
-    url = "#{git_server}/repos/#{resource[:project_name].strip}/hooks"
+    url = "#{gms_server}/repos/#{resource[:project_name].strip}/hooks"
 
     begin
       config_opts = { 'url' => resource[:webhook_url].strip, 'content_type' => 'json' }
@@ -144,7 +144,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
     webhook_id = get_webhook_id
 
     unless webhook_id.nil?
-      url = "#{git_server}/repos/#{resource[:project_name].strip}/hooks/#{webhook_id}"
+      url = "#{gms_server}/repos/#{resource[:project_name].strip}/hooks/#{webhook_id}"
 
       begin
         response = api_call('DELETE', url)

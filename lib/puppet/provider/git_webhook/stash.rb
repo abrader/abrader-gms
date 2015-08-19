@@ -9,7 +9,7 @@ Puppet::Type.type(:git_webhook).provide(:stash) do
 
   def gms_server
     return resource[:server_url].strip unless resource[:server_url].nil?
-    return 'https://localhost:7999'
+    return 'http://localhost:7990'
   end
 
   def api_call(action,url,data = nil)
@@ -24,7 +24,7 @@ Puppet::Type.type(:git_webhook).provide(:stash) do
       http.use_ssl = false
     end
 
-    http.set_debug_output($stdout)
+    Puppet.debug(http.set_debug_output($stdout))
 
     if action =~ /post/i
       req = Net::HTTP::Post.new(uri.request_uri)
@@ -39,34 +39,67 @@ Puppet::Type.type(:git_webhook).provide(:stash) do
     enc = Base64.encode64("#{resource[:username].strip}:#{resource[:password].strip}")
 
     req.set_content_type('application/json')
-    req.add_field('Authorization: Basic', enc)
+    req.basic_auth(resource[:username].strip, resource[:password].strip)
 
     if data
       req.body = data.to_json
     end
+    
+    Puppet.debug("REST API Endpoint: #{uri.to_s}")
+    Puppet.debug("Request: #{req.inspect}")
 
-    http.request(req)
+    response = http.request(req)
+    
+    Puppet.debug("Response: #{response.inspect}")
+    
+    response
   end
 
   def exists?
-    project_id = get_project_id
-
+    pn = resource[:project_name].strip
+    rs = resource[:repo_name].strip
+    
     webhook_hash = Hash.new
-    url = "#{gms_server}/api/v3/projects/#{project_id}/hooks"
+    url = "#{gms_server}/rest/api/1.0/projects/#{pn}/repos/#{rs}/settings/hooks"
 
     response = api_call('GET', url)
+    
+    Puppet.debug("API call response: #{response.class}")
 
     webhook_json = JSON.parse(response.body)
     
-    webhook_json.each do |child|
-      webhook_hash[child['url']] = child['id']
-    end
-
-    webhook_hash.keys.each do |k|
-      if k.eql?(resource[:webhook_url].strip)
-        return true
+    webhook_json.each do |children|
+      children.each do |child|
+        if child.class == Array
+          child.each do |hook|
+            if hook['details']['key'] == 'com.ngs.stash.externalhooks.external-hooks:external-post-receive-hook' && hook['configured'] == true
+              url = "#{gms_server}/rest/api/1.0/projects/#{pn}/repos/#{rs}/settings/hooks/com.ngs.stash.externalhooks.external-hooks:external-post-receive-hook/settings"
+              Puppet.debug "Found a external post commit hook!"
+              response = api_call('GET', url)
+              
+              exec_json = JSON.parse(response.body)
+              
+              exec_check = nil
+              params_check = nil
+              
+              if exec_json['params'].empty? && (resource[:hook_exec_params].nil? || resource[:hook_exec_params].empty?)
+                params_check  = true
+              end
+              
+              if exec_json['exe'] == resource[:hook_exec].strip && params_check
+                Puppet.debug 'stash_webhook: Confirmed webhook exists already. Nothing to be done.'
+                return true
+              else
+                Puppet.debug 'stash_webhook: Webhook differs from parameters passed in resource. Going to fix that now.'
+                return false
+              end
+            end
+          end
+        end
       end
     end
+    
+    raise(Puppet::Error, "stash_webhook: It does not appear you have the External Async Post Receive Hook installed on your Stash server.  This is required for the git_webhook resource to work on Stash servers.")
 
     return false
   end

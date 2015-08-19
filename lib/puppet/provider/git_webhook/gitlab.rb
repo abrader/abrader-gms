@@ -6,7 +6,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
 
   defaultfor :gitlab => :exists
 
-  def git_server
+  def gms_server
     return resource[:server_url].strip unless resource[:server_url].nil?
     return 'https://gitlab.com'
   end
@@ -23,7 +23,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
       http.use_ssl = false
     end
 
-    #http.set_debug_output($stdout)
+    Puppet.debug(http.set_debug_output($stdout))
 
     if action =~ /post/i
       req = Net::HTTP::Post.new(uri.request_uri)
@@ -49,7 +49,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     project_id = get_project_id
 
     webhook_hash = Hash.new
-    url = "#{git_server}/api/v3/projects/#{project_id}/hooks"
+    url = "#{gms_server}/api/v3/projects/#{project_id}/hooks"
 
     response = api_call('GET', url)
 
@@ -77,7 +77,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
 
     project_name = resource[:project_name].strip.sub('/','%2F')
 
-    url = "#{git_server}/api/v3/projects/#{project_name}"
+    url = "#{gms_server}/api/v3/projects/#{project_name}"
 
     begin
       response = api_call('GET', url)
@@ -94,7 +94,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
 
     webhook_hash = Hash.new
 
-    url = "#{git_server}/api/v3/projects/#{project_id}/hooks"
+    url = "#{gms_server}/api/v3/projects/#{project_id}/hooks"
 
     response = api_call('GET', url)
 
@@ -116,7 +116,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
   def create
     project_id = get_project_id
 
-    url = "#{git_server}/api/v3/projects/#{project_id}/hooks"
+    url = "#{gms_server}/api/v3/projects/#{project_id}/hooks"
     
     begin
       opts = { 'url' => resource[:webhook_url].strip }
@@ -151,7 +151,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     webhook_id = get_webhook_id
 
     unless webhook_id.nil?
-      url = "#{git_server}/api/v3/projects/#{project_id}/hooks/#{webhook_id}"
+      url = "#{gms_server}/api/v3/projects/#{project_id}/hooks/#{webhook_id}"
 
       begin
         response = api_call('DELETE', url)
