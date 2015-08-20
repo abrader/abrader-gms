@@ -12,26 +12,26 @@ module Puppet
     end
 
     newparam(:name, :namevar => true) do
-      desc 'A unique title for the key that will be provided to the prefered Git management system.'
+      desc 'A unique title for the key that will be provided to the prefered Git management system. Required.'
     end
 
-    newparam(:system) do
-      desc 'Two options here depending on the git management system (Github or Gitlab)'
-      newvalues('Github', 'Gitlab')
-      validate do |value|
-        String(value)
-        if value =~ /gitlab/i
-          resource[:provider] = :gitlab
-        elsif value =~ /stash/i
-          resource[:provider] = :stash
-        else
-          resource[:provider] = :github
-        end
-      end
-    end
+    # newparam(:system) do
+    #   desc 'Two options here depending on the git management system (Github, Gitlab, Stash)'
+    #   newvalues('Github', 'Gitlab')
+    #   validate do |value|
+    #     String(value)
+    #     if value =~ /gitlab/i
+    #       resource[:provider] = :gitlab
+    #     elsif value =~ /stash/i
+    #       resource[:provider] = :stash
+    #     else
+    #       resource[:provider] = :github
+    #     end
+    #   end
+    # end
 
     newparam(:webhook_url) do
-      desc 'TODO.'
+      desc 'The URL the webhook will trigger upon a commit to the respective respository. Required. NOTE: GitHub & GitLab only.'
       validate do |value|
         unless value =~ /^(https?:\/\/)?(\S*\:\S*\@)?(\S*)\.?(\S*)\.?(\w*):?(\d*)\/?(\S*)$/
           raise(Puppet::Error, "Git webhook URL must be fully qualified, not '#{value}'")
@@ -40,21 +40,21 @@ module Puppet
     end
 
     newparam(:token) do
-      desc 'The private token require to manipulate the Git management system provider chosen.'
+      desc 'The private token require to manipulate the Git management system provider chosen. Required. NOTE: GitHub & GitLab only.'
       munge do |value|
         String(value)
       end
     end
     
     newparam(:username) do
-      desc 'The username to be used for authentication vs a token. NOTE: Stash & Bitbucket only.'
+      desc 'The username to be used for authentication vs a token. NOTE: Stash & Bitbucket only. Required. NOTE: Stash only.'
       munge do |value|
         String(value)
       end
     end
     
     newparam(:password) do
-      desc 'The password to be used for authentication vs a token.  Note: Stash & BitBucket only.'
+      desc 'The password to be used for authentication vs a token. Note: Stash only.'
       munge do |value|
         String(value)
       end
@@ -68,59 +68,59 @@ module Puppet
     end
 
     newparam(:project_name) do
-      desc 'The project name associated with the project.'
+      desc 'The project name associated with the project. Required.'
       munge do |value|
         String(value)
       end
     end
     
     newparam(:repo_name) do
-      desc 'The name of the repository associated with the webhook. NOTE: Stash only.'
+      desc 'The name of the repository associated with the webhook. Required. NOTE: Stash only.'
       munge do |value|
         String(value)
       end
     end
     
-    newparam(:hook_exec) do
-      desc 'The absolute path to the exectuable triggered when a commit has been made to the respository.  NOTE: Stash only.'
+    newparam(:hook_exe) do
+      desc 'The absolute path to the exectuable triggered when a commit has been made to the respository. Required. NOTE: Stash only.'
       munge do |value|
         String(value)
       end
     end
 
-    newparam(:hook_exec_params) do
-      desc 'The parameters to be passed along side of the executable that will be triggered when a commit has been made to the repository.  NOTE: Stash only.'
+    newparam(:hook_exe_params) do
+      desc 'The parameters to be passed along side of the executable that will be triggered when a commit has been made to the repository. Optional. NOTE: Stash only.'
       munge do |value|
         String(value)
       end
     end
     
     newparam(:merge_request_events, :boolean => true, :parent => Puppet::Parameter::Boolean) do
-      desc 'The URL in the webhook_url parameter will be triggered when a merge request is created. NOTE: GitLab only'
+      desc 'The URL in the webhook_url parameter will be triggered when a merge request is created. Optional. NOTE: GitLab only'
      
       defaultto false
     end
     
     newparam(:tag_push_events, :boolean => true, :parent => Puppet::Parameter::Boolean) do
-      desc 'The URL in the webhook_url parameter will be triggered when a tag push event occurs. NOTE: GitLab only'
+      desc 'The URL in the webhook_url parameter will be triggered when a tag push event occurs. Optional. NOTE: GitLab only'
       
       defaultto false
     end
     
     newparam(:issue_events, :boolean => true, :parent => Puppet::Parameter::Boolean) do
-      desc 'The URL in the webhook_url parameter will be triggered when an issue event occurs. NOTE: GitLab only.'
+      desc 'The URL in the webhook_url parameter will be triggered when an issue event occurs. Optional. NOTE: GitLab only.'
       
       defaultto false
     end 
     
     newparam(:disable_ssl_verify, :boolean => true, :parent => Puppet::Parameter::Boolean) do
-      desc 'Boolean value for disabling SSL verification for this webhook. Note: GitHub only'
+      desc 'Boolean value for disabling SSL verification for this webhook. Optional. NOTE: GitHub only'
       
       defaultto false
     end
 
     newparam(:server_url) do
-      desc 'The URL path to the Git management system server.'
+      desc 'The URL path to the Git management system server. Required.'
       validate do |value|
         #unless value =~ /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
         unless value =~ /^(https?:\/\/).*:?.*\/?$/

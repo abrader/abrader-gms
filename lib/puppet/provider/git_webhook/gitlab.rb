@@ -10,6 +10,15 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     return resource[:server_url].strip unless resource[:server_url].nil?
     return 'https://gitlab.com'
   end
+  
+  def calling_method
+    # Get calling method and clean it up for good reporting
+    cm = String.new
+    cm = caller[0].split(" ").last
+    cm.tr!('\'', '')
+    cm.tr!('\`','')
+    cm
+  end
 
   def api_call(action,url,data = nil)
     uri = URI.parse(url)
@@ -42,7 +51,14 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
       req.body = data.to_json
     end
 
-    http.request(req)
+    Puppet.debug("gitlab_webhook::#{calling_method}: REST API #{req.method} Endpoint: #{uri.to_s}")
+    Puppet.debug("gitlab_webhook::#{calling_method}: REST API #{req.method} Request: #{req.inspect}")
+
+    response = http.request(req)
+    
+    Puppet.debug("gitlab_webhook::#{calling_method}: REST API #{req.method} Response: #{response.inspect}")
+    
+    response
   end
 
   def exists?
@@ -61,10 +77,12 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
 
     webhook_hash.keys.each do |k|
       if k.eql?(resource[:webhook_url].strip)
+        Puppet.debug "gitlab_webhook::#{calling_method}: Webhook already exists as specified in calling resource block."
         return true
       end
     end
 
+    Puppet.debug "gitlab_webhook::#{calling_method}: Webhook does not currently exist as specified in calling resource block."
     return false
   end
 
@@ -72,7 +90,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     return resource[:project_id].to_i unless resource[:project_id].nil?
 
     if resource[:project_name].nil?
-      raise(Puppet::Error, "gitlab_webhook: Must provide at least one of the following attributes: project_id or project_name")
+      raise(Puppet::Error, "gitlab_webhook::#{calling_method}: Must provide at least one of the following attributes: project_id or project_name")
     end
 
     project_name = resource[:project_name].strip.sub('/','%2F')
@@ -83,7 +101,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
       response = api_call('GET', url)
       return JSON.parse(response.body)['id'].to_i 
     rescue Exception => e
-      fail(Puppet::Error, "gitlab_webhook: #{e.message}")
+      fail(Puppet::Error, "gitlab_webhook::#{calling_method}: #{e.message}")
       return nil
     end
 
@@ -138,10 +156,10 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
       if (response.class == Net::HTTPCreated)
         return true
       else
-        raise(Puppet::Error, "gitlab_webhook: #{response.inspect}")
+        raise(Puppet::Error, "gitlab_webhook::#{calling_method}: #{response.inspect}")
       end
     rescue Exception => e
-      raise(Puppet::Error, e.message)
+      raise(Puppet::Error, "gitlab_webhook::#{calling_method}: #{e.message}")
     end
   end
 
@@ -159,10 +177,10 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
         if (response.class == Net::HTTPOK)
           return true
         else
-          raise(Puppet::Error, "gitlab_webhook: #{response.inspect}")
+          raise(Puppet::Error, "gitlab_webhook::#{calling_method}: #{response.inspect}")
         end
       rescue Exception => e
-        raise(Puppet::Error, e.message)
+        raise(Puppet::Error, "gitlab_webhook::#{calling_method}: #{e.message}")
       end
 
     end

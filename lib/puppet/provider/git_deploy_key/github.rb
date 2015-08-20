@@ -7,9 +7,18 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
   defaultfor :github => :exist
   defaultfor :feature => :posix
 
-  def git_server
+  def gms_server
     return resource[:server_url].strip unless resource[:server_url].nil?
     return 'https://api.github.com'
+  end
+  
+  def calling_method
+    # Get calling method and clean it up for good reporting
+    cm = String.new
+    cm = caller[0].split(" ").last
+    cm.tr!('\'', '')
+    cm.tr!('\`','')
+    cm
   end
 
   def api_call(action,url,data = nil)
@@ -45,12 +54,19 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
       req.body = data.to_json
     end
 
-    http.request(req)
+    Puppet.debug("github_deploy_key::#{calling_method}: REST API #{req.method} Endpoint: #{uri.to_s}")
+    Puppet.debug("github_deploy_key::#{calling_method}: REST API #{req.method} Request: #{req.inspect}")
+
+    response = http.request(req)
+    
+    Puppet.debug("github_deploy_key::#{calling_method}: REST API #{req.method} Response: #{response.inspect}")
+    
+    response
   end
 
   def exists?
     key_hash = Hash.new
-    url = "#{git_server}/repos/#{resource[:project_name].strip}/keys"
+    url = "#{gms_server}/repos/#{resource[:project_name].strip}/keys"
 
     response = api_call('GET', url)
 
@@ -67,7 +83,7 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
   
   def get_key_id
     key_hash = Hash.new
-    url = "#{git_server}/repos/#{resource[:project_name].strip}/keys"
+    url = "#{gms_server}/repos/#{resource[:project_name].strip}/keys"
 
     response = api_call('GET', url)
 
@@ -83,7 +99,7 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
   end
 
   def create
-    url = "#{git_server}/repos/#{resource[:project_name].strip}/keys"
+    url = "#{gms_server}/repos/#{resource[:project_name].strip}/keys"
 
     begin
       response = api_call('POST', url, {'title' => resource[:name].strip, 'key' => File.read(resource[:path].strip)})
@@ -91,10 +107,10 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
       if (response.class == Net::HTTPCreated)
         return true
       else
-        raise(Puppet::Error, "git_deploy_key: #{response.inspect}")
+        raise(Puppet::Error, "github_deploy_key::#{calling_method}: #{response.inspect}")
       end
     rescue Exception => e
-      raise(Puppet::Error, e.message)
+      raise(Puppet::Error, "github_deploy_key::#{calling_method}: #{e.message}")
     end
   end
 
@@ -102,7 +118,7 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
     key_id = get_key_id
     
     unless key_id.nil?
-      url = "#{git_server}/repos/#{resource[:project_name].strip}/keys/#{key_id}"
+      url = "#{gms_server}/repos/#{resource[:project_name].strip}/keys/#{key_id}"
 
       begin
         response = api_call('DELETE', url)
@@ -110,10 +126,10 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
         if (response.class == Net::HTTPNoContent)
           return true
         else
-          raise(Puppet::Error, "git_deploy_key: #{response.inspect}")
+          raise(Puppet::Error, "github_deploy_key::#{calling_method}: #{response.inspect}")
         end
       rescue Exception => e
-        raise(Puppet::Error, e.message)
+        raise(Puppet::Error, "github_deploy_key::#{calling_method}: #{e.message}")
       end
 
     end

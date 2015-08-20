@@ -28,6 +28,20 @@ module Puppet
         String(value)
       end
     end
+    
+    newparam(:username) do
+      desc 'The username to be used to authenticate with the Stash server for API access.'
+      munge do |value|
+        String(value)
+      end
+    end
+    
+    newparam(:password) do
+      desc 'The password to be used to authenticate with the Stash server for API access.'
+      munge do |value|
+        String(value)
+      end
+    end
 
     newparam(:project_id) do
       desc 'The project ID associated with the project.'
@@ -42,11 +56,19 @@ module Puppet
         String(value)
       end
     end
+    
+    newparam(:repo_name) do
+      desc 'The repository name the deploy key will be associated. If this parameter is ommitted, the deploy key will be associated with the project instead. Optional.  NOTE: Stash only.'
+      munge do |value|
+        String(value)
+      end
+    end
 
     newparam(:server_url) do
       desc 'The URL path to the Git management system server.'
       validate do |value|
-        unless value =~ /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+        #unless value =~ /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/
+        unless value =~ /^(https?:\/\/).*:?.*\/?$/
           raise(Puppet::Error, "Git server URL must be fully qualified, not '#{value}'")
         end
       end

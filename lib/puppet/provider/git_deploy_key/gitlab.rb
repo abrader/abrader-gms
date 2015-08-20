@@ -6,9 +6,18 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
 
   defaultfor :gitlab => :exists
 
-  def git_server
+  def gms_server
     return resource[:server_url].strip unless resource[:server_url].nil?
     return 'https://gitlab.com'
+  end
+  
+  def calling_method
+    # Get calling method and clean it up for good reporting
+    cm = String.new
+    cm = caller[0].split(" ").last
+    cm.tr!('\'', '')
+    cm.tr!('\`','')
+    cm
   end
 
   def api_call(action,url,data = nil)
@@ -35,23 +44,28 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
       req = Net::HTTP::Get.new(uri.request_uri)
     end
 
-    #req.initialize_http_header({'Accept' => 'application/vnd.github.v3+json', 'User-Agent' => 'puppet-gms'})
     req.set_content_type('application/json')
-    #req.add_field('Authorization', "token #{resource[:token].strip}")
     req.add_field('PRIVATE-TOKEN', resource[:token])
 
     if data
       req.body = data.to_json
     end
 
-    http.request(req)
+    Puppet.debug("gitlab_deploy_key::#{calling_method}: REST API #{req.method} Endpoint: #{uri.to_s}")
+    Puppet.debug("gitlab_deploy_key::#{calling_method}: REST API #{req.method} Request: #{req.inspect}")
+
+    response = http.request(req)
+    
+    Puppet.debug("gitlab_deploy_key::#{calling_method}: REST API #{req.method} Response: #{response.inspect}")
+    
+    response
   end
 
   def exists?
     project_id = get_project_id
 
     sshkey_hash = Hash.new
-    url = "#{git_server}/api/v3/projects/#{project_id}/keys"
+    url = "#{gms_server}/api/v3/projects/#{project_id}/keys"
 
     response = api_call('GET', url)
 
@@ -62,10 +76,12 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
 
     sshkey_hash.keys.each do |k|
       if k.eql?(File.read(resource[:path]).strip)
+        Puppet.debug "gitlab_deploy_key::#{calling_method}: Deploy key already exists as specified in calling resource block."
         return true
       end
     end
 
+    Puppet.debug "gitlab_deploy_key::#{calling_method}: Deploy key does not currently exist as specified in calling resource block."
     return false
   end
 
@@ -73,18 +89,18 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
     return resource[:project_id].to_i unless resource[:project_id].nil?
 
     if resource[:project_name].nil?
-      raise(Puppet::Error, "git_deploy_key: Must provide at least one of the following attributes: project_id or project_name")
+      raise(Puppet::Error, "gitlab_deploy_key::#{calling_method}: Must provide at least one of the following attributes: project_id or project_name")
     end
 
     project_name = resource[:project_name].strip.sub('/','%2F')
 
-    url = "#{git_server}/api/v3/projects/#{project_name}"
+    url = "#{gms_server}/api/v3/projects/#{project_name}"
 
     begin
       response = api_call('GET', url)
       return JSON.parse(response.body)['id'].to_i 
     rescue Exception => e
-      fail(Puppet::Error, "git_deploy_key: #{e.message}")
+      fail(Puppet::Error, "gitlab_deploy_key::#{calling_method}: #{e.message}")
       return nil
     end
 
@@ -95,7 +111,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
 
     keys_hash = Hash.new
 
-    url = "#{git_server}/api/v3/projects/#{project_id}/keys"
+    url = "#{gms_server}/api/v3/projects/#{project_id}/keys"
 
     response = api_call('GET', url)
 
@@ -117,7 +133,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
   def create
     project_id = get_project_id
 
-    url = "#{git_server}/api/v3/projects/#{project_id}/keys"
+    url = "#{gms_server}/api/v3/projects/#{project_id}/keys"
 
     begin
       response = api_call('POST', url, {'title' => resource[:name].strip, 'key' => File.read(resource[:path].strip)})
@@ -125,10 +141,10 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
       if (response.class == Net::HTTPCreated)
         return true
       else
-        raise(Puppet::Error, "git_deploy_key: #{response.inspect}")
+        raise(Puppet::Error, "gitlab_deploy_key::#{calling_method}: #{response.inspect}")
       end
     rescue Exception => e
-      raise(Puppet::Error, e.message)
+      raise(Puppet::Error, "gitlab_deploy_key::#{calling_method}: #{e.message}")
     end
   end
 
@@ -138,7 +154,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
     key_id = get_key_id
 
     unless key_id.nil?
-      url = "#{git_server}/api/v3/projects/#{project_id}/keys/#{key_id}"
+      url = "#{gms_server}/api/v3/projects/#{project_id}/keys/#{key_id}"
 
       begin
         response = api_call('DELETE', url)
@@ -146,10 +162,10 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
         if (response.class == Net::HTTPOK)
           return true
         else
-          raise(Puppet::Error, "git_deploy_key: #{response.inspect}")
+          raise(Puppet::Error, "gitlab_deploy_key::#{calling_method}: #{response.inspect}")
         end
       rescue Exception => e
-        raise(Puppet::Error, e.message)
+        raise(Puppet::Error, "gitlab_deploy_key::#{calling_method}: #{e.message}")
       end
 
     end

@@ -8,11 +8,22 @@ Puppet::Type.type(:git_webhook).provide(:github) do
   defaultfor :feature => :posix
 
   def gms_server
+    # Provide the host and port portion of the URL to calling methods
     return resource[:server_url].strip unless resource[:server_url].nil?
     return 'https://api.github.com'
   end
+  
+  def calling_method
+    # Get calling method and clean it up for good reporting
+    cm = String.new
+    cm = caller[0].split(" ").last
+    cm.tr!('\'', '')
+    cm.tr!('\`','')
+    cm
+  end
 
   def api_call(action,url,data = nil)
+    # Single method to make all calls to the respective RESTful API
     uri = URI.parse(url)
 
     http = Net::HTTP.new(uri.host, uri.port)
@@ -41,11 +52,17 @@ Puppet::Type.type(:git_webhook).provide(:github) do
     req.add_field('Authorization', "token #{resource[:token].strip}")
 
     if data
-      #req.body = data[0].to_json
       req.body = data.to_json
     end
 
-    http.request(req)
+    Puppet.debug("github_webhook::#{calling_method}: REST API #{req.method} Endpoint: #{uri.to_s}")
+    Puppet.debug("github_webhook::#{calling_method}: REST API #{req.method} Request: #{req.inspect}")
+
+    response = http.request(req)
+    
+    Puppet.debug("github_webhook::#{calling_method}: REST API #{req.method} Response: #{response.inspect}")
+    
+    response
   end
 
   def exists?
@@ -61,10 +78,12 @@ Puppet::Type.type(:git_webhook).provide(:github) do
 
     webhook_hash.keys.each do |k|
       if k.eql?(resource[:webhook_url].strip)
+        Puppet.debug "github_webhook::#{calling_method}: Webhook already exists as specified in calling resource block."
         return true
       end
     end
-
+    
+    Puppet.debug "github_webhook::#{calling_method}: Webhook does not currently exist as specified in calling resource block."
     return false
   end
 
@@ -72,7 +91,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
     return resource[:project_id].to_i unless resource[:project_id].nil?
 
     if resource[:project_name].nil?
-      raise(Puppet::Error, "git_webhook: Must provide at least one of the following attributes: project_id or project_name")
+      raise(Puppet::Error, "github_webhook::#{calling_method}: Must provide at least one of the following attributes: project_id or project_name")
     end
 
     project_name = resource[:project_name].strip
@@ -83,15 +102,13 @@ Puppet::Type.type(:git_webhook).provide(:github) do
       response = api_call('GET', url)
       return JSON.parse(response.body)['id'].to_i 
     rescue Exception => e
-      fail(Puppet::Error, "git_webhook: #{e.backtrace}")
+      fail(Puppet::Error, "github_webhook::#{calling_method}: #{e.backtrace}")
       return nil
     end
 
   end
 
   def get_webhook_id
-    #project_id = get_project_id
-
     webhook_hash = Hash.new
 
     url = "#{gms_server}/repos/#{resource[:project_name]}/hooks"
@@ -99,7 +116,6 @@ Puppet::Type.type(:git_webhook).provide(:github) do
     response = api_call('GET', url)
 
     webhook_json = JSON.parse(response.body)
-
 
     webhook_json.each do |child|
       webhook_hash[child['config']['url']] = child['id']
@@ -130,13 +146,13 @@ Puppet::Type.type(:git_webhook).provide(:github) do
       
       response = api_call('POST', url, { 'name' => 'web', 'active' => true, 'config' => config_opts })
 
-      if (response.class == Net::HTTPCreated)
+      if response.class == Net::HTTPCreated
         return true
       else
-        raise(Puppet::Error, "git_webhook: #{response.inspect}")
+        raise(Puppet::Error, "github_webhook::#{calling_method}: #{response.inspect}")
       end
     rescue Exception => e
-      raise(Puppet::Error, "#{e.message} &&&& #{e.backtrace}")
+      raise(Puppet::Error, "github_webhook::#{calling_method}: #{e.message}")
     end
   end
 
@@ -152,10 +168,10 @@ Puppet::Type.type(:git_webhook).provide(:github) do
         if (response.class == Net::HTTPNoContent)
           return true
         else
-          raise(Puppet::Error, "git_webhook: #{response.inspect}")
+          raise(Puppet::Error, "github_webhook::#{calling_method}: #{response.inspect}")
         end
       rescue Exception => e
-        raise(Puppet::Error, e.backtrace)
+        raise(Puppet::Error, "github_webhook::#{calling_method}: #{e.message}")
       end
 
     end
