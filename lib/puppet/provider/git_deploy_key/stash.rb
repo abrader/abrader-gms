@@ -7,15 +7,14 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
 
   defaultfor :stash => :exists
   
-  class << self
-    attr_accessor :dk_key_id
-    def preinit
-      @dk_key_id = nil
-    end
-  end
-
-  self.preinit
+  # attr_accessor :dk_key_id
   
+  # def dk_key_id(value=nil)
+  #   dk_key_id ||= value
+  # end
+  
+  @@dk_key_id = 0
+
   def calling_method
     # Get calling method and clean it up for good reporting
     cm = String.new
@@ -127,17 +126,15 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
       Puppet.debug("stash_deploy_key::#{calling_method}: No pre-existing deploy keys. Onto creation!")
       return false
     else
-      #Puppet.debug("key_json = #{key_json.to_json}")
       key_json['values'].each do |v|
         if v['key']['text'].eql?(File.read(resource[:path].strip).strip)
           Puppet.debug("stash_deploy_key::#{calling_method}: Found a key match for deploy key.  Nothing more to do.")
-          Puppet.debug("v = #{v.inspect}")
-          @dk_key_id = v['key']['id']
+          @@dk_key_id = v['key']['id']
           return true
         end
       end    
     end
-  
+    
     Puppet.debug("stash_deploy_key::#{calling_method}: Key provided with git_deploy_key resource is not a match for what is on file. Onto creation!")
     return false
   end
@@ -150,16 +147,15 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
     opts = Hash.new
     opts['key'] = Hash.new
     opts['key']['text'] = File.read(resource[:path].strip).strip
-    opts['permission'] = "REPO_READ"
     
     unless resource[:repo_name].nil?
       rs = resource[:repo_name].strip
+      opts['permission'] = "REPO_READ"
       url = "#{gms_server}/rest/keys/1.0/projects/#{pn}/repos/#{rs}/ssh"
     else
+      opts['permission'] = "PROJECT_READ"
       url = "#{gms_server}/rest/keys/1.0/projects/#{pn}/ssh"
     end
-    
-    Puppet.debug("key_id = #{@dk_key_id}")
     
     response = api_call('POST', url, opts)
     
@@ -180,13 +176,20 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
     
     unless resource[:repo_name].nil?
       rs = resource[:repo_name].strip
-      url = "#{gms_server}/rest/keys/1.0/projects/#{pn}/repos/#{rs}/ssh"
+      url = "#{gms_server}/rest/keys/1.0/projects/#{pn}/repos/#{rs}/ssh/#{@@dk_key_id}"
     else
-      url = "#{gms_server}/rest/keys/1.0/projects/#{pn}/ssh"
+      url = "#{gms_server}/rest/keys/1.0/projects/#{pn}/ssh/#{@@dk_key_id}"
     end
     
-    #response = api_call('DELETE', url, opts)
+    response = api_call('DELETE', url)
     
+    if response.class == Net::HTTPNoContent
+      if resource[:repo_name].nil?
+        Puppet.debug("stash_deploy_key::#{calling_method}: Successfully deleted deploy key \'#{resource[:name]}\' from project \'#{resource[:project_name]}\'")
+      else
+        Puppet.debug("stash_deploy_key::#{calling_method}: Successfully deleted deploy key \'#{resource[:name]}\' from respository \'#{resource[:repo_name]}\' in project \'#{resource[:project_name]}\'")
+      end
+    end
   end
   
 end
