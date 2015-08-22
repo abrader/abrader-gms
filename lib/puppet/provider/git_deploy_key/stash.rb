@@ -6,17 +6,6 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
 
   defaultfor :stash => :exists
   
-  # def self.instances
-  #   mk_resource_methods
-  # end
-  #
-  # def self.prefetch(resources)
-  #   # instances.each do |param|
-  #   #   Puppet.notice(resources.inspect)
-  #   # end
-  #   #Puppet.notice("resources = #{self.get_provider}")
-  # end
-
   def calling_method
     # Get calling method and clean it up for good reporting
     cm = String.new
@@ -27,6 +16,7 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
   end
   
   def prereq_check
+    # Check to see if all required parameters have been passed
     missing_params = Array.new
     
     if resource[:name].nil?
@@ -53,11 +43,13 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
   end
 
   def gms_server
+    # Return the prefix portion of the URL
     return resource[:server_url].strip unless resource[:server_url].nil?
     return 'http://localhost:7990'
   end
   
   def api_call(action,url,data = nil)
+    # Reusable API caller method
     uri = URI.parse(url)
 
     http = Net::HTTP.new(uri.host, uri.port)
@@ -101,6 +93,7 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
   end
   
   def get_key_id
+    # Return the deploy key ID
     prereq_check()
     
     url = String.new
@@ -138,6 +131,7 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
   end
   
   def exists?
+    # Checks to see if the deploy exists on the Stash server
     if get_key_id.nil?
       return false
     else
@@ -145,44 +139,8 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
     end
   end
   
-    #
-    # url = String.new
-    #
-    # pn = resource[:project_name].strip
-    #
-    # unless resource[:repo_name].nil?
-    #   rs = resource[:repo_name].strip
-    #   url = "#{gms_server}/rest/keys/1.0/projects/#{pn}/repos/#{rs}/ssh"
-    # else
-    #   url = "#{gms_server}/rest/keys/1.0/projects/#{pn}/ssh"
-    # end
-    #
-    # response = api_call('GET', url)
-    #
-    # raise(Puppet::Error, "stash_deploy_key::#{calling_method}: #{response.inspect}") unless response.class == Net::HTTPOK
-    #
-    # key_json = JSON.parse(response.body)
-    #
-    # # Clearly no deploy keys exist if size == 0
-    # if key_json['size'] == 0
-    #   Puppet.debug("stash_deploy_key::#{calling_method}: No pre-existing deploy keys. Onto creation!")
-    #   return false
-    # else
-    #   key_json['values'].each do |v|
-    #     if v['key']['text'].eql?(File.read(resource[:path].strip).strip)
-    #       Puppet.debug("stash_deploy_key::#{calling_method}: Found a key match for deploy key.  Nothing more to do.")
-    #       #@@dk_key_id = v['key']['id']
-    #       String.class_variable_set(:@@dk_key_id, v['key']['id'])
-    #       return true
-    #     end
-    #   end
-    # end
-    #
-    # Puppet.debug("stash_deploy_key::#{calling_method}: Key provided with git_deploy_key resource is not a match for what is on file. Onto creation!")
-    # return false
-    # end
-  
   def create
+    # Creates a deploy key in the Stash server project or repository referenced.
     pn = resource[:project_name].strip
     
     url = String.new
@@ -215,6 +173,7 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
   end
   
   def destroy
+    # Remove the deploy key from the Stash project or respository referenced.
     dk_key_id = get_key_id
     pn = resource[:project_name].strip
     
