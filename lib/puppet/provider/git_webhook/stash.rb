@@ -17,6 +17,7 @@ Puppet::Type.type(:git_webhook).provide(:stash) do
   end
   
   def prereq_check
+    # Check to see if all required parameters have been passed
     missing_params = Array.new
     
     if resource[:name].nil?
@@ -51,6 +52,7 @@ Puppet::Type.type(:git_webhook).provide(:stash) do
   end
 
   def api_call(action,url,data = nil)
+    # Reusable API caller method
     uri = URI.parse(url)
 
     http = Net::HTTP.new(uri.host, uri.port)
@@ -94,6 +96,7 @@ Puppet::Type.type(:git_webhook).provide(:stash) do
   end
 
   def exists?
+    # Checks to see if the webhook exists on the Stash server
     prereq_check()
     
     pn = resource[:project_name].strip
@@ -142,22 +145,13 @@ Puppet::Type.type(:git_webhook).provide(:stash) do
               
               if hook.key?('enabled')
                 if resource[:ensure].to_s == 'present' && hook['enabled'] == false
-                  #enable()
                   return false
                 elsif resource[:ensure].to_s == 'absent' && hook['enabled'] == true
-                  #disable()
                   return true
                 elsif resource[:ensure] == :present && hook['enabled'] == true
                   return true
                 else
                   return false
-                  state = String.new
-                  if resource[:ensure].to_s == 'absent'
-                    state = 'disabled'
-                  else
-                    state = 'enabled'
-                  end
-                  Puppet.debug "stash_webhook::#{calling_method}: External post receive hook is already in a #{state} state."
                 end
               end
               
@@ -178,6 +172,7 @@ Puppet::Type.type(:git_webhook).provide(:stash) do
   end
 
   def create
+    # Creates a webhook in the Stash repository referenced.
     pn = resource[:project_name].strip
     rs = resource[:repo_name].strip
     
@@ -203,6 +198,7 @@ Puppet::Type.type(:git_webhook).provide(:stash) do
   end
   
   def enable
+    # Enabled a webhook in the Stash repository referenced.
     pn = resource[:project_name].strip
     rs = resource[:repo_name].strip
     
@@ -223,6 +219,7 @@ Puppet::Type.type(:git_webhook).provide(:stash) do
   end
 
   def disable
+    # Disable a webhook in the Stash repository referenced.
     pn = resource[:project_name].strip
     rs = resource[:repo_name].strip
     
@@ -243,7 +240,7 @@ Puppet::Type.type(:git_webhook).provide(:stash) do
   end
 
   def destroy
-    # Destroy is handled in Stash by disabling the external post receive hook
+    # Renders the webhook unusable.
     disable()
   end
 
