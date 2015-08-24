@@ -15,21 +15,6 @@ module Puppet
       desc 'A unique title for the key that will be provided to the prefered Git management system. Required.'
     end
 
-    # newparam(:system) do
-    #   desc 'Two options here depending on the git management system (Github, Gitlab, Stash)'
-    #   newvalues('Github', 'Gitlab')
-    #   validate do |value|
-    #     String(value)
-    #     if value =~ /gitlab/i
-    #       resource[:provider] = :gitlab
-    #     elsif value =~ /stash/i
-    #       resource[:provider] = :stash
-    #     else
-    #       resource[:provider] = :github
-    #     end
-    #   end
-    # end
-
     newparam(:webhook_url) do
       desc 'The URL the webhook will trigger upon a commit to the respective respository. Required. NOTE: GitHub & GitLab only.'
       validate do |value|
@@ -47,14 +32,14 @@ module Puppet
     end
     
     newparam(:username) do
-      desc 'The username to be used for authentication vs a token. NOTE: Stash & Bitbucket only. Required. NOTE: Stash only.'
+      desc 'The username to be used for authentication vs a token. Required. NOTE: Stash only.'
       munge do |value|
         String(value)
       end
     end
     
     newparam(:password) do
-      desc 'The password to be used for authentication vs a token. Note: Stash only.'
+      desc 'The password to be used for authentication vs a token. Required. Note: Stash only.'
       munge do |value|
         String(value)
       end

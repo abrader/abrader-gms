@@ -1,3 +1,18 @@
+##2015-08-24 - Release 1.0.0
+###Summary
+
+This release introduces Stash support for both deploy keys and webhooks.
+
+The [README](https://github.com/abrader/abrader-gms/blob/master/README.md) has been updated to include the usage notes for these parameters.
+
+####Features
+- New parameters - `Stash`
+  - `username`
+  - `password`
+  - `repo_name`
+
+- - -
+
 ##2015-06-12 - Release 0.0.9
 ###Summary
 
