@@ -163,7 +163,7 @@ git_deploy_key { 'magical stash deploy key' :
 
 A webhook allows repository admins to manage the post-receive hooks for a repository.  Very helpful in the case you have many Puppet masters you manage and therefore are responsible for their respective webhooks.  This is refers only to respository webhooks and not organizational webhook as offered by Github.  If that functionality is ever supported by this project it will be identified separately.
 
-### Mandatory Parameters
+### GMS system agnostic mandatory parameters
 
 #### ensure
 
