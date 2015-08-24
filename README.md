@@ -187,6 +187,10 @@ or
 ```puppet
 provider     => 'gitlab',
 ```
+or
+```puppet
+provider     => 'stash',
+```
 
 #### webhook_url
 
@@ -209,7 +213,7 @@ The project name associated with the project
 Be sure to follow the 'userid/repo' format to insure proper operation for GitHub & GitLab.  For Stash, only include the project name for this parameter.
 
 ```puppet
-project_name => 'abrader/abrader-gms',
+project_name => 'control',
 ```
 
 #### server_url
