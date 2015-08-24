@@ -315,7 +315,7 @@ git_webhook { 'web_post_receive_webhook' :
   webhook_url        => 'https://puppetmaster.example.com:8088/payload',
   token              =>  hiera('gitlab_api_token'),
   project_name       => 'puppet/control',
-  server_url         => 'http://your.internal.gitlab.server.com',
+  server_url         => 'http://your.internal.github.server.com',
   disable_ssl_verify => true,
   provider           => 'github',
 }
