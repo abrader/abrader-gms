@@ -136,15 +136,15 @@ The example below utilizes the optional [repo_name](#repo_name) parameter to ens
 
 ```puppet
 git_deploy_key { 'magical stash deploy key' :
-  ensure           => present,
-  name             => $::fqdn,
-  username         => hiera('stash_api_username'),
-  password         => hiera('stash_api_password'),
-  project_name     => 'puppet',
-  repo_name        => 'control',
-  path             => '/root/.ssh/id_rsa.pub',
-  server_url       => 'http://your.internal.stash.server.com:7990',
-  provider         => 'stash',
+  ensure       => present,
+  name         => $::fqdn,
+  username     => hiera('stash_api_username'),
+  password     => hiera('stash_api_password'),
+  project_name => 'puppet',
+  repo_name    => 'control',
+  path         => '/root/.ssh/id_rsa.pub',
+  server_url   => 'http://your.internal.stash.server.com:7990',
+  provider     => 'stash',
 }
 ```
 
