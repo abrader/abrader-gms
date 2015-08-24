@@ -142,10 +142,15 @@ Puppet::Type.type(:git_webhook).provide(:stash) do
               
               if hook.key?('enabled')
                 if resource[:ensure].to_s == 'present' && hook['enabled'] == false
-                  enable()
+                  #enable()
+                  return false
                 elsif resource[:ensure].to_s == 'absent' && hook['enabled'] == true
-                  disable()
+                  #disable()
+                  return true
+                elsif resource[:ensure] == :present && hook['enabled'] == true
+                  return true
                 else
+                  return false
                   state = String.new
                   if resource[:ensure].to_s == 'absent'
                     state = 'disabled'
@@ -239,6 +244,7 @@ Puppet::Type.type(:git_webhook).provide(:stash) do
 
   def destroy
     # Destroy is handled in Stash by disabling the external post receive hook
+    disable()
   end
 
 end
