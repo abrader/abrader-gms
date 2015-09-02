@@ -24,7 +24,7 @@ The following is a table indicating the necessary level of permission needed for
 
 A deploy key is an SSH key that is stored on your server and grants access to a single GitHub repository.  This key is attached directly to the repository instead of to a personal user account.  Anyone with access to the repository and server has the ability to deploy the project.  It is also beneficial for users since they are not required to change their local SSH settings.
 
-### GMS system agnostic mandatory parameters
+### GMS agnostic mandatory parameters
 
 #### ensure
 
