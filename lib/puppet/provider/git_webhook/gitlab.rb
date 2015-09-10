@@ -32,7 +32,9 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
       http.use_ssl = false
     end
 
-    Puppet.debug(http.set_debug_output($stdout))
+    if Puppet[:debug] == true
+      http.set_debug_output($stdout)
+    end
 
     if action =~ /post/i
       req = Net::HTTP::Post.new(uri.request_uri)

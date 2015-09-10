@@ -32,7 +32,9 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
       http.use_ssl = false
     end
 
-    #http.set_debug_output($stdout)
+    if Puppet[:debug] == true
+      http.set_debug_output($stdout)
+    end
 
     if action =~ /post/i
       req = Net::HTTP::Post.new(uri.request_uri)
