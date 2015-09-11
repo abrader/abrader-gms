@@ -125,7 +125,7 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
       begin
         response = api_call('DELETE', url)
 
-        if (response.class == Net::HTTPNoContent)
+        if response.class == Net::HTTPNoContent
           return true
         else
           raise(Puppet::Error, "github_deploy_key::#{calling_method}: #{response.inspect}")

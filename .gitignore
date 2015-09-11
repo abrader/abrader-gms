@@ -1,3 +1,5 @@
 .*.swp
-manifests/init.pp
+manifests/
+tests/
+examples/
 pkg/

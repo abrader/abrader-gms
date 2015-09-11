@@ -161,7 +161,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
       begin
         response = api_call('DELETE', url)
 
-        if (response.class == Net::HTTPOK)
+        if response.class == Net::HTTPOK
           return true
         else
           raise(Puppet::Error, "gitlab_deploy_key::#{calling_method}: #{response.inspect}")

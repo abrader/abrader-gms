@@ -1,7 +1,7 @@
 require 'puppet/parameter/boolean'
 
 module Puppet
-  Puppet::Type.newtype(:git_groupteam) do 
+  Puppet::Type.newtype(:git_groupteam_member) do 
 
     @doc = %q{TODO
     }
@@ -50,8 +50,15 @@ module Puppet
     #   end
     # end
     
-    newparam(:description) do
-      desc 'The description associated with the group to be managed. Optional.'
+    newparam(:member_name) do
+      desc 'The member name to be managed in regards to the group/team. Required.'
+      munge do |value|
+        String(value)
+      end
+    end
+    
+    newparam(:access_level) do
+      desc 'The access level associated with member being managed in regards to group/team. Required.'
       munge do |value|
         String(value)
       end

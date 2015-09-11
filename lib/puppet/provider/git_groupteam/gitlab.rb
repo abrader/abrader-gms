@@ -109,7 +109,8 @@ Puppet::Type.type(:git_groupteam).provide(:gitlab) do
         return v.to_i
       end
     end
-
+    
+    raise(Puppet::Error, "gitlab_groupteam_member::#{calling_method}: Unable to find nonexistent group \'#{resource[:groupteam_name].strip}\'")
     return nil
   end
     
@@ -146,7 +147,7 @@ Puppet::Type.type(:git_groupteam).provide(:gitlab) do
       begin
         response = api_call('DELETE', url)
 
-        if (response.class == Net::HTTPOK)
+        if response.class == Net::HTTPOK
           return true
         else
           raise(Puppet::Error, "gitlab_groupteam::#{calling_method}: #{response.inspect}")
