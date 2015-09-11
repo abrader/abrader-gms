@@ -97,6 +97,7 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
       end
     end
 
+    raise(Puppet::Error, "github_deploy_key::#{calling_method}: Unable to find nonexistent project name \'#{resource[:project_name].strip}\' to retrieve corresponding ID")
     return nil
   end
 

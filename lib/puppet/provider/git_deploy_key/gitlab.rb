@@ -129,6 +129,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
       end
     end
 
+    raise(Puppet::Error, "gitlab_deploy_key::#{calling_method}: Unable to find nonexistent project ID \'#{resource[:project_name].strip}\' to retrieve corresponding key ID")
     return nil
   end
     
