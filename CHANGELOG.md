@@ -1,3 +1,8 @@
+##2015-10-20 - Release 1.0.1
+###Summary
+
+This release is purely to expose debugging functionality previously assumed as released. ;)
+
 ##2015-08-24 - Release 1.0.0
 ###Summary
 
