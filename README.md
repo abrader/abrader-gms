@@ -22,7 +22,7 @@ The following is a table indicating the necessary level of permission needed for
 
 ## Debugging
 
-Troubleshooting issues when APIs are involved be painful.  Doesn't have to be now the advertised providers withing this module can pass you useful debugging info when you append the debug argument to your puppet run:
+Troubleshooting issues when APIs are involved can be painful.  Now the advertised providers within this module can pass you useful debugging info when you append the debug argument to your puppet run:
 
 ```bash
 puppet apply --debug
