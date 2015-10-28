@@ -287,14 +287,16 @@ The name of the repository associated
 repo_name       => 'control',
 ```
 
-### GitHub optional parameters
+### GitHub & Gitlab optional parameters
 
 #### disable\_ssl_verify
-Boolean value for disabling SSL verification for this webhook. **NOTE: GitHub only**
+Boolean value for disabling SSL verification for this webhook. **NOTE: Does not work on Stash **
 
 ```puppet
 disable_ssl_verify => true,
 ```
+
+The gitlab provider sets `enable_ssl_verification` to false when this attribute is used
 
 ### GitLab optional Parameters
 
