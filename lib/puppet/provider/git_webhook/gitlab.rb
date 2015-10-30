@@ -141,6 +141,14 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     begin
       opts = { 'url' => resource[:webhook_url].strip }
       
+      if resource.disable_ssl_verify?
+        if resource[:disable_ssl_verify] == true
+          opts['enable_ssl_verification'] = 'false'
+        else
+          opts['enable_ssl_verification'] = 'true'
+        end
+      end
+
       if resource.merge_request_events?
         opts['merge_requests_events'] = resource[:merge_request_events]
       end
