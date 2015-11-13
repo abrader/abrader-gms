@@ -28,7 +28,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
 
     http = Net::HTTP.new(uri.host, uri.port)
 
-    if uri.port == 443
+    if uri.port == 443 or uri.scheme == 'https'
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     else
