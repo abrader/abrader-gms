@@ -148,13 +148,18 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
     opts = Hash.new
     opts['key'] = Hash.new
     opts['key']['text'] = File.read(resource[:path].strip).strip
-    
+
+    permission = "READ"
+    if resource[:write_permission] == :true
+      permission = "WRITE"
+    end
+
     unless resource[:repo_name].nil?
       rs = resource[:repo_name].strip
-      opts['permission'] = "REPO_READ"
+      opts['permission'] = "REPO_" + permission
       url = "#{gms_server}/rest/keys/1.0/projects/#{pn}/repos/#{rs}/ssh"
     else
-      opts['permission'] = "PROJECT_READ"
+      opts['permission'] = "PROJECT_" + permission
       url = "#{gms_server}/rest/keys/1.0/projects/#{pn}/ssh"
     end
     
