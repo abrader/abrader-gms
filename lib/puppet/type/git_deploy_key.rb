@@ -74,6 +74,13 @@ module Puppet
       end
     end
 
+    newparam(:write_permission) do
+      desc "Whether the deploy key has read or write access. Defaults to false."
+      newvalues(:true, :false)
+
+      defaultto :false
+    end
+
     autorequire(:file) do
       self[:path]if self[:path] and Pathname.new(self[:path]).absolute?
     end
