@@ -9,7 +9,7 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
 
   def gms_server
     return resource[:server_url].strip unless resource[:server_url].nil?
-    return 'https://api.github.com'
+    return 'https://github.com/api/v3'
   end
   
   def calling_method
