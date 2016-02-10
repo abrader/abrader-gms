@@ -1,7 +1,23 @@
+##2016-02-10 - Release 1.0.2
+###Summary
+
+This release is mainly a wrap of fixes and updates prior to a major rewrite
+
+####Fixes
+- Deploy Keys
+  - All Providers
+    - Removed restriction on SSL port
+  - Stash
+    - Fixed issue with initial deploy key not getting created 
+
+- - -
+
 ##2015-10-20 - Release 1.0.1
 ###Summary
 
 This release is purely to expose debugging functionality previously assumed as released. ;)
+
+- - -
 
 ##2015-08-24 - Release 1.0.0
 ###Summary
