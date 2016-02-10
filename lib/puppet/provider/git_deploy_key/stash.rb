@@ -54,7 +54,7 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
 
     http = Net::HTTP.new(uri.host, uri.port)
 
-    if uri.port == 443
+    if uri.port == 443 or uri.scheme == 'https'
       http.use_ssl = true
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     else
@@ -116,7 +116,7 @@ Puppet::Type.type(:git_deploy_key).provide(:stash) do
     # Clearly no deploy keys exist if size == 0
     if key_json['size'] == 0
       Puppet.debug("stash_deploy_key::#{calling_method}: No pre-existing deploy keys. Onto creation!")
-      return false
+      return nil
     else
       key_json['values'].each do |v|
         if v['key']['text'].eql?(File.read(resource[:path].strip).strip)
