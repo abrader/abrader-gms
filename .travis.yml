@@ -1,0 +1,38 @@
+---
+language: ruby
+bundler_args: --without development acceptance
+cache: bundler
+branches:
+  only:
+    - master
+before_install: rm Gemfile.lock || true
+sudo: false
+script:
+  - "bundle exec rake lint"
+  - "bundle exec rake syntax"
+  - "bundle exec rake spec SPEC_OPTS='--format documentation'"
+rvm:
+  - 1.9.3
+  - 2.0.0
+  - 2.1
+  - 2.2
+env:
+  - PUPPET_VERSION="~> 3.2.0"
+  - PUPPET_VERSION="~> 3.3.0"
+  - PUPPET_VERSION="~> 3.4.0"
+  - PUPPET_VERSION="~> 3.5.1"
+  - PUPPET_VERSION="~> 3.6.0"
+  - PUPPET_VERSION="~> 3.7.0"
+  - PUPPET_VERSION="~> 4.0.0"
+
+global:
+  - PUBLISHER_LOGIN=abrader
+
+notifications:
+  email: false
+  webhooks:
+    urls:
+      - 'https://webhooks.gitter.im/e/16f24db0492933fce79d' 
+    on_success: change
+    on_failure: always
+    on_start: false

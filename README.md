@@ -1,3 +1,8 @@
+[![Puppet
+Forge](http://img.shields.io/puppetforge/v/abrader/gms.svg)](https://forge.puppetlabs.com/abrader/gms)
+[![Build
+Status](https://travis-ci.org/abrader/abrader-gms.svg?branch=master)](https://travis-ci.org/abrader/abrader-gms)
+
 # Git Management Systems API Types & Providers
 
 As of right now this repository only covers the following GMS functionality:
@@ -281,7 +286,7 @@ Stash allows a deploy key to be associated with a project ([project_name](#proje
 
 #### repo\_name
 
-The name of the repository associated 
+The name of the repository associated
 
 ```puppet
 repo_name       => 'control',
