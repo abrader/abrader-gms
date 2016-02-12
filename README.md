@@ -2,6 +2,8 @@
 Forge](http://img.shields.io/puppetforge/v/abrader/gms.svg)](https://forge.puppetlabs.com/abrader/gms)
 [![Build
 Status](https://travis-ci.org/abrader/abrader-gms.svg?branch=master)](https://travis-ci.org/abrader/abrader-gms)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/abrader/abrader-gms?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Puppet Forge Downloads](http://img.shields.io/puppetforge/dt/abrader/abrader-gms.svg)](https://forge.puppetlabs.com/abrader/abrader-gms)
 
 # Git Management Systems API Types & Providers
 
