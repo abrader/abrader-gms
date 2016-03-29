@@ -82,6 +82,12 @@ Both http & https URLs are acceptable.
 server_url   => 'http://my.internal.gms.server.example.com',
 ```
 
+If using GitHub Enterprise, add `/api/v3` to the URL, and you'll probably need to use https:
+
+```puppet
+server_url   => 'https://my.internal.gms.server.example.com/api/v3',
+```
+
 #### provider
 
 The Git Management System you are currently using in reference to the webhook you are managing.  Currently only GitHub and GitLab are supported.
