@@ -115,6 +115,12 @@ name         => 'One of my unique deploy keys',
 
 GitHub and GitLab utilize a token based authentication system to access their APIs respectively
 
+The API token generated must have admin permissions and the ability to read/write keys. If the permissions are wrong, you'll likely see the following error message:
+
+```
+...can't convert String into Integer...
+```
+
 #### token
 This is the unique token you created within your GMS to allow you to interface with the system via the API.
 
