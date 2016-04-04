@@ -1,7 +1,7 @@
 require 'puppet/parameter/boolean'
 
 module Puppet
-  Puppet::Type.newtype(:git_webhook) do 
+  Puppet::Type.newtype(:git_webhook) do
 
     @doc = %q{TODO
     }
@@ -30,14 +30,14 @@ module Puppet
         String(value)
       end
     end
-    
+
     newparam(:username) do
       desc 'The username to be used for authentication vs a token. Required. NOTE: Stash only.'
       munge do |value|
         String(value)
       end
     end
-    
+
     newparam(:password) do
       desc 'The password to be used for authentication vs a token. Required. Note: Stash only.'
       munge do |value|
@@ -58,14 +58,14 @@ module Puppet
         String(value)
       end
     end
-    
+
     newparam(:repo_name) do
       desc 'The name of the repository associated with the webhook. Required. NOTE: Stash only.'
       munge do |value|
         String(value)
       end
     end
-    
+
     newparam(:hook_exe) do
       desc 'The absolute path to the exectuable triggered when a commit has been made to the respository. Required. NOTE: Stash only.'
       munge do |value|
@@ -79,28 +79,28 @@ module Puppet
         String(value)
       end
     end
-    
+
     newparam(:merge_request_events, :boolean => true, :parent => Puppet::Parameter::Boolean) do
       desc 'The URL in the webhook_url parameter will be triggered when a merge request is created. Optional. NOTE: GitLab only'
-     
+
       defaultto false
     end
-    
+
     newparam(:tag_push_events, :boolean => true, :parent => Puppet::Parameter::Boolean) do
       desc 'The URL in the webhook_url parameter will be triggered when a tag push event occurs. Optional. NOTE: GitLab only'
-      
+
       defaultto false
     end
-    
+
     newparam(:issue_events, :boolean => true, :parent => Puppet::Parameter::Boolean) do
       desc 'The URL in the webhook_url parameter will be triggered when an issue event occurs. Optional. NOTE: GitLab only.'
-      
+
       defaultto false
-    end 
-    
+    end
+
     newparam(:disable_ssl_verify, :boolean => true, :parent => Puppet::Parameter::Boolean) do
       desc 'Boolean value for disabling SSL verification for this webhook. Optional. NOTE: GitHub only'
-      
+
       defaultto false
     end
 

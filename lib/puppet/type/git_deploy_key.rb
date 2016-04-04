@@ -28,14 +28,14 @@ module Puppet
         String(value)
       end
     end
-    
+
     newparam(:username) do
       desc 'The username to be used to authenticate with the Stash server for API access.'
       munge do |value|
         String(value)
       end
     end
-    
+
     newparam(:password) do
       desc 'The password to be used to authenticate with the Stash server for API access.'
       munge do |value|
@@ -56,7 +56,7 @@ module Puppet
         String(value)
       end
     end
-    
+
     newparam(:repo_name) do
       desc 'The repository name the deploy key will be associated. If this parameter is ommitted, the deploy key will be associated with the project instead. Optional.  NOTE: Stash only.'
       munge do |value|

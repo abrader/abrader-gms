@@ -3,7 +3,7 @@ require 'net/http'
 require 'json'
 
 Puppet::Type.type(:git_webhook).provide(:github) do
-  
+
   defaultfor :github => :exist
   defaultfor :feature => :posix
 
@@ -12,7 +12,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
     return resource[:server_url].strip unless resource[:server_url].nil?
     return 'https://api.github.com'
   end
-  
+
   def calling_method
     # Get calling method and clean it up for good reporting
     cm = String.new
@@ -61,9 +61,9 @@ Puppet::Type.type(:git_webhook).provide(:github) do
     Puppet.debug("github_webhook::#{calling_method}: REST API #{req.method} Request: #{req.inspect}")
 
     response = http.request(req)
-    
+
     Puppet.debug("github_webhook::#{calling_method}: REST API #{req.method} Response: #{response.inspect}")
-    
+
     response
   end
 
@@ -84,7 +84,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
         return true
       end
     end
-    
+
     Puppet.debug "github_webhook::#{calling_method}: Webhook does not currently exist as specified in calling resource block."
     return false
   end
@@ -102,7 +102,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
 
     begin
       response = api_call('GET', url)
-      return JSON.parse(response.body)['id'].to_i 
+      return JSON.parse(response.body)['id'].to_i
     rescue Exception => e
       fail(Puppet::Error, "github_webhook::#{calling_method}: #{e.backtrace}")
       return nil
@@ -131,13 +131,13 @@ Puppet::Type.type(:git_webhook).provide(:github) do
 
     return nil
   end
-    
+
   def create
     url = "#{gms_server}/repos/#{resource[:project_name].strip}/hooks"
 
     begin
       config_opts = { 'url' => resource[:webhook_url].strip, 'content_type' => 'json' }
-      
+
       if resource.disable_ssl_verify?
         if resource[:disable_ssl_verify] == true
           config_opts['insecure_ssl'] = 1
@@ -145,7 +145,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
           config_opts['insecure_ssl'] = 0
         end
       end
-      
+
       response = api_call('POST', url, { 'name' => 'web', 'active' => true, 'config' => config_opts })
 
       if response.class == Net::HTTPCreated

@@ -11,7 +11,7 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
     return resource[:server_url].strip unless resource[:server_url].nil?
     return 'https://api.github.com'
   end
-  
+
   def calling_method
     # Get calling method and clean it up for good reporting
     cm = String.new
@@ -60,9 +60,9 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
     Puppet.debug("github_deploy_key::#{calling_method}: REST API #{req.method} Request: #{req.inspect}")
 
     response = http.request(req)
-    
+
     Puppet.debug("github_deploy_key::#{calling_method}: REST API #{req.method} Response: #{response.inspect}")
-    
+
     response
   end
 
@@ -73,7 +73,7 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
     response = api_call('GET', url)
 
     key_json = JSON.parse(response.body)
-    
+
     key_json.each do |child|
       if child['key'].split(" ")[1].eql?(File.read(resource[:path].strip).split(" ")[1])
         return true
@@ -82,7 +82,7 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
 
     return false
   end
-  
+
   def get_key_id
     key_hash = Hash.new
     url = "#{gms_server}/repos/#{resource[:project_name].strip}/keys"
@@ -90,7 +90,7 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
     response = api_call('GET', url)
 
     key_json = JSON.parse(response.body)
-    
+
     key_json.each do |child|
       if child['key'].split(" ")[1].eql?(File.read(resource[:path].strip).split(" ")[1])
         return child['id'].to_s
@@ -119,7 +119,7 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
 
   def destroy
     key_id = get_key_id
-    
+
     unless key_id.nil?
       url = "#{gms_server}/repos/#{resource[:project_name].strip}/keys/#{key_id}"
 

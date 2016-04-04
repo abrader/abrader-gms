@@ -10,7 +10,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     return resource[:server_url].strip unless resource[:server_url].nil?
     return 'https://gitlab.com'
   end
-  
+
   def calling_method
     # Get calling method and clean it up for good reporting
     cm = String.new
@@ -57,9 +57,9 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     Puppet.debug("gitlab_webhook::#{calling_method}: REST API #{req.method} Request: #{req.inspect}")
 
     response = http.request(req)
-    
+
     Puppet.debug("gitlab_webhook::#{calling_method}: REST API #{req.method} Response: #{response.inspect}")
-    
+
     response
   end
 
@@ -72,7 +72,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     response = api_call('GET', url)
 
     webhook_json = JSON.parse(response.body)
-    
+
     webhook_json.each do |child|
       webhook_hash[child['url']] = child['id']
     end
@@ -101,7 +101,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
 
     begin
       response = api_call('GET', url)
-      return JSON.parse(response.body)['id'].to_i 
+      return JSON.parse(response.body)['id'].to_i
     rescue Exception => e
       fail(Puppet::Error, "gitlab_webhook::#{calling_method}: #{e.message}")
       return nil
@@ -132,15 +132,15 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
 
     return nil
   end
-    
+
   def create
     project_id = get_project_id
 
     url = "#{gms_server}/api/v3/projects/#{project_id}/hooks"
-    
+
     begin
       opts = { 'url' => resource[:webhook_url].strip }
-      
+
       if resource.disable_ssl_verify?
         if resource[:disable_ssl_verify] == true
           opts['enable_ssl_verification'] = 'false'
@@ -156,11 +156,11 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
       if resource.tag_push_events?
         opts['tag_push_events'] = resource[:tag_push_events]
       end
-      
+
       if resource.issue_events?
         opts['issues_events'] = resource[:issue_events]
       end
-      
+
       response = api_call('POST', url, opts)
 
       if (response.class == Net::HTTPCreated)

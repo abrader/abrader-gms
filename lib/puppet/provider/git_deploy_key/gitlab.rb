@@ -10,7 +10,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
     return resource[:server_url].strip unless resource[:server_url].nil?
     return 'https://gitlab.com'
   end
-  
+
   def calling_method
     # Get calling method and clean it up for good reporting
     cm = String.new
@@ -57,9 +57,9 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
     Puppet.debug("gitlab_deploy_key::#{calling_method}: REST API #{req.method} Request: #{req.inspect}")
 
     response = http.request(req)
-    
+
     Puppet.debug("gitlab_deploy_key::#{calling_method}: REST API #{req.method} Response: #{response.inspect}")
-    
+
     response
   end
 
@@ -100,7 +100,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
 
     begin
       response = api_call('GET', url)
-      return JSON.parse(response.body)['id'].to_i 
+      return JSON.parse(response.body)['id'].to_i
     rescue Exception => e
       fail(Puppet::Error, "gitlab_deploy_key::#{calling_method}: #{e.message}")
       return nil
@@ -132,7 +132,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
     raise(Puppet::Error, "gitlab_deploy_key::#{calling_method}: Unable to find nonexistent project ID \'#{resource[:project_name].strip}\' to retrieve corresponding key ID")
     return nil
   end
-    
+
   def create
     project_id = get_project_id
 

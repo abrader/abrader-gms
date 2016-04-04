@@ -1,7 +1,7 @@
 require 'puppet/parameter/boolean'
 
 module Puppet
-  Puppet::Type.newtype(:git_groupteam) do 
+  Puppet::Type.newtype(:git_groupteam) do
 
     @doc = %q{TODO
     }
@@ -21,7 +21,7 @@ module Puppet
         String(value)
       end
     end
-    
+
     # newparam(:username) do
     #   desc 'The username to be used for authentication vs a token. Required. NOTE: Stash only.'
     #   munge do |value|
@@ -49,21 +49,21 @@ module Puppet
     #     String(value)
     #   end
     # end
-    
+
     newparam(:description) do
       desc 'The description associated with the group to be managed. Optional.'
       munge do |value|
         String(value)
       end
     end
-    
+
     # newparam(:repo_name) do
     #   desc 'The name of the repository associated with the webhook. Required. NOTE: Stash only.'
     #   munge do |value|
     #     String(value)
     #   end
     # end
-    
+
     # newparam(:hook_exe) do
     #   desc 'The absolute path to the exectuable triggered when a commit has been made to the respository. Required. NOTE: Stash only.'
     #   munge do |value|
@@ -77,7 +77,7 @@ module Puppet
     #     String(value)
     #   end
     # end
-    
+
     # newparam(:merge_request_events, :boolean => true, :parent => Puppet::Parameter::Boolean) do
     #   desc 'The URL in the webhook_url parameter will be triggered when a merge request is created. Optional. NOTE: GitLab only'
     #
