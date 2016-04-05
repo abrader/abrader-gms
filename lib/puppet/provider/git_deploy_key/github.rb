@@ -1,8 +1,10 @@
 require 'puppet'
 require 'net/http'
 require 'json'
+require 'puppet_x/gms/provider'
 
 Puppet::Type.type(:git_deploy_key).provide(:github) do
+  include PuppetX::GMS::Provider
 
   defaultfor :github => :exist
   defaultfor :feature => :posix
@@ -49,8 +51,8 @@ Puppet::Type.type(:git_deploy_key).provide(:github) do
 
     req.initialize_http_header({'Accept' => 'application/vnd.github.v3+json', 'User-Agent' => 'puppet-gms'})
     req.set_content_type('application/json')
-    req.add_field('Authorization', "token #{resource[:token].strip}")
-    #req.add_field('PRIVATE-TOKEN', resource[:token])
+    req.add_field('Authorization', "token #{get_token}")
+    #req.add_field('PRIVATE-TOKEN', get_token)
 
     if data
       req.body = data.to_json

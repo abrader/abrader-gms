@@ -1,5 +1,8 @@
+require 'puppet_x/gms/type'
+
 module Puppet
   Puppet::Type.newtype(:git_deploy_key) do
+    include PuppetX::GMS::Type
 
     @doc = %q{A deploy key is an SSH key that is stored on your server and grants access to a single GitHub repository.  This key is attached directly to the repository instead of to a personal user account.  Anyone with access to the repository and server has the ability to deploy the project.  It is also beneficial for users since they are not required to change their local SSH settings.
     }
@@ -22,26 +25,10 @@ module Puppet
       end
     end
 
-    newparam(:token) do
-      desc 'The private token require to manipulate the Git management system provider chosen.'
-      munge do |value|
-        String(value)
-      end
-    end
-
-    newparam(:username) do
-      desc 'The username to be used to authenticate with the Stash server for API access.'
-      munge do |value|
-        String(value)
-      end
-    end
-
-    newparam(:password) do
-      desc 'The password to be used to authenticate with the Stash server for API access.'
-      munge do |value|
-        String(value)
-      end
-    end
+    add_parameter_token
+    add_parameter_token_file
+    add_parameter_username
+    add_parameter_password
 
     newparam(:project_id) do
       desc 'The project ID associated with the project.'
@@ -76,6 +63,10 @@ module Puppet
 
     autorequire(:file) do
       self[:path]if self[:path] and Pathname.new(self[:path]).absolute?
+    end
+
+    validate do
+      validate_token_or_token_file
     end
 
   end

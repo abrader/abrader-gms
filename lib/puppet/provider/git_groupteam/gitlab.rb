@@ -1,8 +1,10 @@
 require 'puppet'
 require 'net/http'
 require 'json'
+require 'puppet_x/gms/provider'
 
 Puppet::Type.type(:git_groupteam).provide(:gitlab) do
+  include PuppetX::GMS::Provider
 
   defaultfor :gitlab => :exists
 
@@ -47,7 +49,7 @@ Puppet::Type.type(:git_groupteam).provide(:gitlab) do
     end
 
     req.set_content_type('application/json')
-    req.add_field('PRIVATE-TOKEN', resource[:token])
+    req.add_field('PRIVATE-TOKEN', get_token)
 
     if data
       req.body = data.to_json

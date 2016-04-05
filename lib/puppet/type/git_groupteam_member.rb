@@ -1,7 +1,9 @@
 require 'puppet/parameter/boolean'
+require 'puppet_x/gms/type'
 
 module Puppet
   Puppet::Type.newtype(:git_groupteam_member) do
+    include PuppetX::GMS::Type
 
     @doc = %q{TODO
     }
@@ -15,26 +17,11 @@ module Puppet
       desc 'A unique title for the key that will be provided to the prefered Git management system. Required.'
     end
 
-    newparam(:token) do
-      desc 'The private token require to manipulate the Git management system provider chosen. Required. NOTE: GitHub & GitLab only.'
-      munge do |value|
-        String(value)
-      end
-    end
+    add_parameter_token
+    add_parameter_token_file
 
-    # newparam(:username) do
-    #   desc 'The username to be used for authentication vs a token. Required. NOTE: Stash only.'
-    #   munge do |value|
-    #     String(value)
-    #   end
-    # end
-    #
-    # newparam(:password) do
-    #   desc 'The password to be used for authentication vs a token. Required. Note: Stash only.'
-    #   munge do |value|
-    #     String(value)
-    #   end
-    # end
+    # add_parameter_username
+    # add_parameter_password
 
     # newparam(:project_id) do
     #   desc 'The project ID associated with the project.'
@@ -117,6 +104,10 @@ module Puppet
           raise(Puppet::Error, "Git server URL must be fully qualified, not '#{value}'")
         end
       end
+    end
+
+    validate do
+      validate_token_or_token_file
     end
 
   end
