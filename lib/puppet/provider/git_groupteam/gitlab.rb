@@ -1,8 +1,10 @@
 require 'puppet'
 require 'net/http'
 require 'json'
+require 'puppet_x/gms/provider'
 
 Puppet::Type.type(:git_groupteam).provide(:gitlab) do
+  include PuppetX::GMS::Provider
 
   defaultfor :gitlab => :exists
 
@@ -10,7 +12,7 @@ Puppet::Type.type(:git_groupteam).provide(:gitlab) do
     return resource[:server_url].strip unless resource[:server_url].nil?
     return 'https://gitlab.com'
   end
-  
+
   def calling_method
     # Get calling method and clean it up for good reporting
     cm = String.new
@@ -47,7 +49,7 @@ Puppet::Type.type(:git_groupteam).provide(:gitlab) do
     end
 
     req.set_content_type('application/json')
-    req.add_field('PRIVATE-TOKEN', resource[:token])
+    req.add_field('PRIVATE-TOKEN', get_token)
 
     if data
       req.body = data.to_json
@@ -57,9 +59,9 @@ Puppet::Type.type(:git_groupteam).provide(:gitlab) do
     Puppet.debug("gitlab_groupteam::#{calling_method}: REST API #{req.method} Request: #{req.inspect}")
 
     response = http.request(req)
-    
+
     Puppet.debug("gitlab_groupteam::#{calling_method}: REST API #{req.method} Response: #{response.inspect}")
-    
+
     response
   end
 
@@ -70,11 +72,11 @@ Puppet::Type.type(:git_groupteam).provide(:gitlab) do
     response = api_call('GET', url)
 
     groupteam_json = JSON.parse(response.body)
-    
+
     groupteam_json.each do |child|
       groupteam_hash[child['name']] = child['description']
     end
-    
+
     groupteam_hash.each do |k,v|
       if k.eql?(resource[:groupteam_name].strip)
         unless (v.nil? && resource[:description].nil?) || (v && resource[:description]) && v.eql?(resource[:description].strip)
@@ -90,7 +92,7 @@ Puppet::Type.type(:git_groupteam).provide(:gitlab) do
     Puppet.debug "gitlab_groupteam::#{calling_method}: Group \'#{resource[:name]}\' does not currently exist"
     return false
   end
-  
+
   def get_group_id
     group_hash = Hash.new
 
@@ -109,21 +111,21 @@ Puppet::Type.type(:git_groupteam).provide(:gitlab) do
         return v.to_i
       end
     end
-    
+
     raise(Puppet::Error, "gitlab_groupteam_member::#{calling_method}: Unable to find nonexistent group \'#{resource[:groupteam_name].strip}\'")
     return nil
   end
-    
+
   def create
     url = "#{gms_server}/api/v3/groups"
 
     begin
       opts = { 'name' => resource[:groupteam_name].strip, 'path' => resource[:groupteam_name].strip }
-      
+
       unless resource[:description].nil?
         opts['description'] = resource[:description].strip
       end
-      
+
       Puppet.debug("opts => #{opts.inspect}")
 
       response = api_call('POST', url, opts)
