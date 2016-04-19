@@ -1,33 +1,33 @@
 require_relative '../../../puppet_x/puppetlabs/gms.rb'
+require 'puppet_x/gms/provider'
 require 'puppet/type/gms_webhook'
 require 'json'
 
 Puppet::Type.type(:gms_webhook).provide(:github, :parent => PuppetX::Puppetlabs::Gms) do
+  include PuppetX::GMS::Provider
 
   defaultfor :github => :exist
   defaultfor :feature => :posix
 
-  mk_resource_methods
-
   def self.instances
-    Puppet.notice("def self.instances")
+    Puppet.debug("def self.instances")
 
     instances = []
 
     repos_url = "#{gms_server}/user/repos"
-    repos = get(repos_url)
+    repos = get(repos_url, @token)
 
     webhooks = Array.new
-    $hooks = Hash.new
+    hooks = Hash.new
 
     repos.each do |r|
 
       hooks_url = r['hooks_url']
-      hook_objs = get(hooks_url)
+      hook_objs = get(hooks_url, @token)
       return [] if hook_objs.nil?
 
       hook_objs.each do |h|
-        $hooks[h['id']] = h['url'] if h.class == Hash && h[:message].nil?
+        hooks[h['id']] = h['url'] if h.class == Hash && h[:message].nil?
         webhooks << h if h.class == Hash && h[:message].nil?
       end
 
@@ -35,14 +35,18 @@ Puppet::Type.type(:gms_webhook).provide(:github, :parent => PuppetX::Puppetlabs:
 
     webhooks.each do |webhook|
 
-      webhook['config']['insecure_ssl'] = :true   if webhook['config']['insecure_ssl'] && webhook['config']['insecure_ssl'] == '1'
-      webhook['config']['insecure_ssl'] = :false  if webhook['config']['insecure_ssl'] && webhook['config']['insecure_ssl'] == '0'
+      if webhook['config']['insecure_ssl'] == '1' || webhook['config']['insecure_ssl'] == 'true'
+        webhook['config']['insecure_ssl'] = :true
+      else
+        webhook['config']['insecure_ssl'] = :false
+      end
+
+      webhook['active'] = :true  if webhook['active'] == true
+      webhook['active'] = :false if webhook['active'] == false
 
       # Build project_name parameter
       pn_array = webhook['url'].strip.split('/')
       pn = pn_array[4] + '/' + pn_array[5]
-
-      # Puppet.notice("webhook_url: #{webhook['config']['url'].class} |#{webhook['config']['url']}|") if webhook['config']['url']
 
       instances << new(
         ensure:                :present,
@@ -61,83 +65,92 @@ Puppet::Type.type(:gms_webhook).provide(:github, :parent => PuppetX::Puppetlabs:
         updated_at:            webhook['updated_at'],
         created_at:            webhook['created_at'],
         secret:                webhook['config']['secret'],
-        disable_ssl_verify:    webhook['config']['insecure_ssl'],
+        insecure_ssl:          webhook['config']['insecure_ssl'],
         content_type:          webhook['config']['content_type'],
         webhook_url:           webhook['config']['url']
-        # config:                webhook['config']
       )
+      webhook.delete('config')
     end
+
+    $webhooks = instances if $webhooks.nil? || $webhooks.empty?
 
     instances
   end
 
   def self.prefetch(resources)
-    Puppet.notice("def self.prefetch")
-    @project_name = resources[resources.keys.first].value('project_name')
+    Puppet.debug("def self.prefetch")
+
     @token = resources[resources.keys.first].value('token')
 
     $webhooks = instances
 
     resources.keys.each do |name|
-      if provider = $webhooks.find { |wh| wh.name == name }
+      if provider = $webhooks.find { |wh| wh.project_name == resources[name].parameters[:project_name].value && wh.webhook_url == resources[name].parameters[:webhook_url].value }
         resources[name].provider = provider
+        # Assume the user wants the webhook to be active if they did not specify a value for the active property but ensure => true
+        if resources[name].parameters[:ensure].value == :present && resources[name].parameters[:active].nil?
+          resources[name][:active] = true
+        end
       end
     end
   end
 
   def message(object)
-    Puppet.notice("def message")
+    Puppet.debug("def message")
     # Allows us to pass in resources and get all the attributes out
     # in the form of a hash.
 
     message = object.to_hash
 
-    message[:content_type] = 'json' if message[:content_type].nil?
-
-    config_map = {
-      :'content_type'       => :content_type,
-      :'disable_ssl_verify' => :insecure_ssl,
-      :'webhook_url'        => :url,
-    }
-
-    if message[:active].nil? && (message[:ensure] == :present || resource[:ensure] == :present)
+    if message[:active] == :false
+      message[:active] = false
+    elsif message[:active] == :absent && message[:ensure] == :present
       message[:active] = true
     else
-      message[:active] = false
+      message[:active] = true
     end
 
+    message[:content_type] = 'json' if message[:content_type].nil?
+
     message[:events] = ['push'] if message[:events].nil?
+
+    if message[:insecure_ssl] == :true || message[:insecure_ssl] == true
+      message[:insecure_ssl] = '1'
+    else message[:insecure_ssl] == :false
+      message[:insecure_ssl] = '0'
+    end
 
     # For now, we will only support setting up 'web' webhooks.  GitHub has a
     # list of many more types of webhooks that can be supported:
     # https://api.github.com/hooks
     message[:name] = 'web'
 
+    config_map = {
+      :'content_type'       => :content_type,
+      :'insecure_ssl'       => :insecure_ssl,
+      :'webhook_url'        => :url,
+    }
+
     message = nest_hash_keys(config_map, :config, message)
     github_params = [:name, :config, :events, :active]
     message = sanitize_hash(github_params, message)
-    # message = create_message(message)
-
-    Puppet.notice("message = #{message.inspect}")
 
     message.to_json
   end
 
-  def get_webhook_id
-    Puppet.notice("def get_webhook_id")
-
-    $webhooks.each do |wh|
-      # Puppet.notice("#{resource[:project_name]} == #{wh.project_name}")
-      # Puppet.notice("#{resource[:config]['url']} vs #{wh.config['url']}")
-      # if resource[:project_name] == wh.project_name && resource[:config]['url'] == wh.config['url']
-      if resource[:project_name] == wh.project_name && resource[:webhook_url] == wh.webhook_url
-        Puppet.notice("Sending back ID: #{wh.id}")
-        return wh.id
-      end
-    end
-
-    return nil
-  end
+  # def get_webhook_id
+  #   Puppet.debug("def get_webhook_id")
+  #
+  #   return self.id unless self.id == :absent || self.id.empty?
+  #
+  #   $webhooks.each do |wh|
+  #     if resource[:project_name] == wh.project_name && resource[:webhook_url] == wh.webhook_url
+  #       return wh.id
+  #     end
+  #   end
+  #
+  #   return nil
+  # end
 
   def gms_server
     PuppetX::Puppetlabs::Gms::gms_server
@@ -153,29 +166,19 @@ Puppet::Type.type(:gms_webhook).provide(:github, :parent => PuppetX::Puppetlabs:
   end
 
   def exists?
-    Puppet.notice("def exists")
-    return true if $webhooks && get_webhook_id
+    Puppet.debug("def exists #{self.id}")
     @property_hash[:ensure] == :present
   end
 
   def flush
-    Puppet.notice ("def flush")
+    Puppet.debug("def flush")
 
-    quality_control(@property_hash)
-
-    if @property_hash == {}
-      return nil
-    end
-
-    webhook_id = get_webhook_id
-
-    patch_url = "#{gms_server}/repos/#{resource[:project_name].strip}/hooks/#{webhook_id}"
+    # resource[:project_name].strip
+    patch_url = "#{gms_server}/repos/#{self.project_name}/hooks/#{self.id}"
 
     if @property_hash != {}
-      Puppet.notice("FLUSH: Getting into PATCH: #{resource[:project_name]} vs #{@property_hash.inspect}")
-
       begin
-        response = PuppetX::Puppetlabs::Gms.patch(patch_url, message(@property_hash))
+        response = PuppetX::Puppetlabs::Gms.patch(patch_url, get_token, message(@property_hash))
 
         if response.class != Net::HTTPOK
           raise(Puppet::Error, "github_webhook::#{calling_method}: #{response.inspect}")
@@ -189,10 +192,12 @@ Puppet::Type.type(:gms_webhook).provide(:github, :parent => PuppetX::Puppetlabs:
   end
 
   def create
-    post_url = "#{self.gms_server}/repos/#{resource[:project_name].strip}/hooks"
+    Puppet.debug('def create')
 
     begin
-      response = PuppetX::Puppetlabs::Gms.post(post_url, message(resource))
+      post_url = "#{self.gms_server}/repos/#{resource[:project_name].strip}/hooks"
+
+      response = PuppetX::Puppetlabs::Gms.post(post_url, get_token, message(resource))
 
       if response.class != Net::HTTPCreated
         raise(Puppet::Error, "gms_github_webhook::#{calling_method}: #{response.inspect}")
@@ -210,15 +215,13 @@ Puppet::Type.type(:gms_webhook).provide(:github, :parent => PuppetX::Puppetlabs:
   end
 
   def destroy
-    Puppet.notice("def destroy")
-
-    webhook_id = get_webhook_id
+    Puppet.debug("def destroy")
 
     unless webhook_id.nil?
-      destroy_url = "#{gms_server}/repos/#{resource[:project_name].strip}/hooks/#{webhook_id}"
+      destroy_url = "#{gms_server}/repos/#{resource[:project_name].strip}/hooks/#{self.id}"
 
       begin
-        response = PuppetX::Puppetlabs::Gms.delete(destroy_url)
+        response = PuppetX::Puppetlabs::Gms.delete(destroy_url, get_token)
 
         if (response.class == Net::HTTPNoContent)
           return true
@@ -231,5 +234,7 @@ Puppet::Type.type(:gms_webhook).provide(:github, :parent => PuppetX::Puppetlabs:
 
     end
   end
+
+  mk_resource_methods
 
 end

@@ -1,26 +1,27 @@
 require_relative '../../puppet_x/puppetlabs/property/read_only'
+require 'puppet_x/gms/type'
 
 Puppet::Type.newtype(:gms_webhook) do
+  include PuppetX::GMS::Type
 
   @doc = 'To manage webhooks on major GMS systems.'
 
   ensurable
 
-  newparam(:name, :namevar => true) do
-    desc 'A unique title for the key that will be provided to the prefered Git management system. Required.'
-  end
+  newparam(:name)
+
+  # newparam(:name, :namevar => true) do
+  #   desc 'A unique title for the key that will be provided to the prefered Git management system. Required.'
+  #
+  #   def insync?(is)
+  #     is == should
+  #   end
+  # end
 
   newproperty(:active) do
     desc 'TODO'
 
-    munge do |value|
-     value.to_s
-    end
-
-    def insync?(is)
-      Puppet.notice("is = #{is.inspect} vs should = #{should.inspect}")
-      is == should
-    end
+    newvalues(true, false)
   end
 
   newproperty(:webhook_url) do
@@ -35,7 +36,6 @@ Puppet::Type.newtype(:gms_webhook) do
         raise(Puppet::Error, "Git webhook URL must be fully qualified, not '#{value}'")
       end
     end
-
   end
 
   newproperty(:content_type) do
@@ -46,38 +46,20 @@ Puppet::Type.newtype(:gms_webhook) do
     end
   end
 
-  # newproperty(:config) do
-  #   desc 'TODO'
-  #
-  #   #this is a comparison that ignores order
-  #   # def insync?(is)
-  #   #   Puppet.notice("is = #{is.sort} and should = #{should.sort}")
-  #   #   is.sort == should.sort
-  #   # end
-  # end
-
   newproperty(:events, :array_matching => :all) do
     desc 'Events that should trigger the activation of the webhook'
 
     newvalues("commit_comment", "create", "delete", "deployment", "deployment_status", "fork", "gollum", "issue_comment", "issues", "member", "public", "pull_request", "pull_request_review_comment", "push", "release",  "status", "team_add", "watch")
 
     def insync?(is)
-      Puppet.notice("is = #{is.inspect} vs should = #{should.inspect}")
       is.to_set == should.to_set
     end
   end
 
-  newparam(:token) do
-    desc 'The private token require to manipulate the Git management system provider chosen. Required. NOTE: GitHub & GitLab only.'
-  end
-
-  newproperty(:username) do
-    desc 'The username to be used for authentication vs a token. Required. NOTE: Stash only.'
-  end
-
-  newproperty(:password) do
-    desc 'The password to be used for authentication vs a token. Required. Note: Stash only.'
-  end
+  add_parameter_token
+  add_parameter_token_file
+  add_parameter_username
+  add_parameter_password
 
   newproperty(:project_name) do
     desc 'The project name associated with the project. Required.'
@@ -111,12 +93,10 @@ Puppet::Type.newtype(:gms_webhook) do
     desc 'The URL in the webhook_url parameter will be triggered when an issue event occurs. Optional. NOTE: GitLab only.'
   end
 
-  newproperty(:disable_ssl_verify) do
+  newproperty(:insecure_ssl) do
     desc 'Boolean value for disabling SSL verification for this webhook. Optional.'
 
-    munge do |value|
-     value.to_s
-    end
+    newvalues(:true, :false)
   end
 
   newproperty(:server_url) do
@@ -149,6 +129,10 @@ Puppet::Type.newtype(:gms_webhook) do
        value.to_s
       end
     end
+  end
+
+  validate do
+    validate_token_or_token_file
   end
 
 end
