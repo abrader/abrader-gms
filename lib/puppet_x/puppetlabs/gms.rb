@@ -139,8 +139,8 @@ module PuppetX
           req.initialize_http_header({'Accept' => 'application/vnd.github.v3+json', 'User-Agent' => 'puppet-gms'})
           req.set_content_type('application/json')
 
-          if @token && ! @token.empty?
-            req.add_field('Authorization', "token #{@token}")
+          if token && ! token.empty?
+            req.add_field('Authorization', "token #{token}")
           elsif @token_file && ! @token_file.empty? && File.exist?(@token_file)
             req.add_field('Authorization', "token #{File.read(@token_file).strip}")
           elsif ENV['GMS_TOKEN']
