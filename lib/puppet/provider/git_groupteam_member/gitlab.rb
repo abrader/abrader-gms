@@ -1,11 +1,13 @@
 require 'puppet'
 require 'net/http'
 require 'json'
+require 'puppet_x/gms/provider'
 
 Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
+  include PuppetX::GMS::Provider
 
   defaultfor :gitlab => :exists
-  
+
   GUEST     = 10
   REPORTER  = 20
   DEVELOPER = 30
@@ -16,7 +18,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     return resource[:server_url].strip unless resource[:server_url].nil?
     return 'https://gitlab.com'
   end
-  
+
   def calling_method
     # Get calling method and clean it up for good reporting
     cm = String.new
@@ -54,7 +56,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     end
 
     req.set_content_type('application/json')
-    req.add_field('PRIVATE-TOKEN', resource[:token])
+    req.add_field('PRIVATE-TOKEN', get_token)
 
     if data
       req.body = data.to_json
@@ -64,15 +66,15 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     Puppet.debug("gitlab_groupteam_member::#{calling_method}: REST API #{req.method} Request: #{req.inspect}")
 
     response = http.request(req)
-    
+
     Puppet.debug("gitlab_groupteam_member::#{calling_method}: REST API #{req.method} Response: #{response.inspect}")
-    
+
     response
   end
 
   def exists?
     group_id = get_group_id
-    
+
     groupteam_hash = Hash.new
     url = "#{gms_server}/api/v3//groups/#{group_id}/members"
 
@@ -94,11 +96,11 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     Puppet.debug "gitlab_groupteam_member::#{calling_method}: Member \'#{resource[:member_name]}\' is not currently a member of #{resource[:groupteam_name].strip}"
     return false
   end
-  
-  def get_access_level    
+
+  def get_access_level
     unless resource[:access_level].nil?
       al = resource[:access_level].strip
-      
+
       case al
       when /guest/i
         Puppet.debug("gitlab_groupteam_member::#{calling_method}:  Access Level = #{GUEST}")
@@ -124,7 +126,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
       return nil
     end
   end
-  
+
   def get_group_id
     group_hash = Hash.new
 
@@ -147,7 +149,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     raise(Puppet::Error, "gitlab_groupteam_member::#{calling_method}: Unable to find nonexistent group \'#{resource[:groupteam_name].strip}\'")
     return nil
   end
-  
+
   def get_user_id
     group_hash = Hash.new
 
@@ -156,7 +158,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     response = api_call('GET', url)
 
     group_json = JSON.parse(response.body)
-    
+
     group_json.each do |child|
       group_hash[child['username']] = child['id']
     end
@@ -170,12 +172,12 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     raise(Puppet::Error, "gitlab_groupteam_member::#{calling_method}: Unable to add nonexistent user \'#{resource[:member_name].strip}\' to group #{resource[:groupteam_name].strip}")
     return nil
   end
-    
+
   def create
     access_level = get_access_level
     group_id = get_group_id
     user_id  = get_user_id
-    
+
     url = "#{gms_server}/api/v3//groups/#{group_id}/members"
 
     begin

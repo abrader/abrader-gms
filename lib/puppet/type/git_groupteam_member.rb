@@ -1,7 +1,9 @@
 require 'puppet/parameter/boolean'
+require 'puppet_x/gms/type'
 
 module Puppet
-  Puppet::Type.newtype(:git_groupteam_member) do 
+  Puppet::Type.newtype(:git_groupteam_member) do
+    include PuppetX::GMS::Type
 
     @doc = %q{TODO
     }
@@ -15,26 +17,11 @@ module Puppet
       desc 'A unique title for the key that will be provided to the prefered Git management system. Required.'
     end
 
-    newparam(:token) do
-      desc 'The private token require to manipulate the Git management system provider chosen. Required. NOTE: GitHub & GitLab only.'
-      munge do |value|
-        String(value)
-      end
-    end
-    
-    # newparam(:username) do
-    #   desc 'The username to be used for authentication vs a token. Required. NOTE: Stash only.'
-    #   munge do |value|
-    #     String(value)
-    #   end
-    # end
-    #
-    # newparam(:password) do
-    #   desc 'The password to be used for authentication vs a token. Required. Note: Stash only.'
-    #   munge do |value|
-    #     String(value)
-    #   end
-    # end
+    add_parameter_token
+    add_parameter_token_file
+
+    # add_parameter_username
+    # add_parameter_password
 
     # newparam(:project_id) do
     #   desc 'The project ID associated with the project.'
@@ -49,28 +36,28 @@ module Puppet
     #     String(value)
     #   end
     # end
-    
+
     newparam(:member_name) do
       desc 'The member name to be managed in regards to the group/team. Required.'
       munge do |value|
         String(value)
       end
     end
-    
+
     newparam(:access_level) do
       desc 'The access level associated with member being managed in regards to group/team. Required.'
       munge do |value|
         String(value)
       end
     end
-    
+
     # newparam(:repo_name) do
     #   desc 'The name of the repository associated with the webhook. Required. NOTE: Stash only.'
     #   munge do |value|
     #     String(value)
     #   end
     # end
-    
+
     # newparam(:hook_exe) do
     #   desc 'The absolute path to the exectuable triggered when a commit has been made to the respository. Required. NOTE: Stash only.'
     #   munge do |value|
@@ -84,7 +71,7 @@ module Puppet
     #     String(value)
     #   end
     # end
-    
+
     # newparam(:merge_request_events, :boolean => true, :parent => Puppet::Parameter::Boolean) do
     #   desc 'The URL in the webhook_url parameter will be triggered when a merge request is created. Optional. NOTE: GitLab only'
     #
@@ -117,6 +104,10 @@ module Puppet
           raise(Puppet::Error, "Git server URL must be fully qualified, not '#{value}'")
         end
       end
+    end
+
+    validate do
+      validate_token_or_token_file
     end
 
   end

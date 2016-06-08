@@ -2,6 +2,8 @@
 Forge](http://img.shields.io/puppetforge/v/abrader/gms.svg)](https://forge.puppetlabs.com/abrader/gms)
 [![Build
 Status](https://travis-ci.org/abrader/abrader-gms.svg?branch=master)](https://travis-ci.org/abrader/abrader-gms)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/abrader/abrader-gms?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![Puppet Forge Downloads](http://img.shields.io/puppetforge/dt/abrader/gms.svg)](https://forge.puppetlabs.com/abrader/gms)
 
 # Git Management Systems API Types & Providers
 
@@ -114,6 +116,13 @@ This is the unique token you created within your GMS to allow you to interface w
 token        => 'ABCDEF1234568',
 ```
 
+#### token\_file
+The path to a file containing the unique token you created within your GMS to allow you to interface with the system via the API. This is an alternative to, and is mutually exlusive to use of the `token` parameter.
+
+```puppet
+token_file   => '/etc/gitlab/api-token',
+```
+
 ### Stash mandatory authentication parameters
 
 Stash utilizes a Basic Authentication system as well as an OAuth system for accessing their API respectively.  Since OAuth requires a callback URL based system that can not be feasibly implemented by this GMS module, only Basic Authenticaiton is supported.
@@ -176,7 +185,7 @@ git_deploy_key { 'magical stash deploy key' :
 
 --
 
-## git_webhook
+## git\_webhook
 
 A webhook allows repository admins to manage the post-receive hooks for a repository.  Very helpful in the case you have many Puppet masters you manage and therefore are responsible for their respective webhooks.  This is refers only to respository webhooks and not organizational webhook as offered by Github.  If that functionality is ever supported by this project it will be identified separately.
 
@@ -218,7 +227,7 @@ or
 provider     => 'stash',
 ```
 
-#### webhook_url
+#### webhook\_url
 
 The URL relating to the webhook.  This typically has payload in the name.
 
@@ -233,7 +242,14 @@ This is the unique token you created within your GMS to allow you to interface w
 token        => 'ABCDEF1234568',
 ```
 
-#### project_name
+#### token\_file
+The path to a file containing the unique token you created within your GMS to allow you to interface with the system via the API. This is an alternative to, and is mutually exlusive to use of the `token` parameter.
+
+```puppet
+token_file   => '/etc/gitlab/api-token',
+```
+
+#### project\_name
 The project name associated with the project
 
 Be sure to follow the 'userid/repo' format to insure proper operation for GitHub & GitLab.  For Stash, only include the project name for this parameter.
@@ -242,7 +258,7 @@ Be sure to follow the 'userid/repo' format to insure proper operation for GitHub
 project_name => 'control',
 ```
 
-#### server_url
+#### server\_url
 The URL path to the Git management system server
 
 Both http & https URLs are acceptable.
@@ -260,6 +276,13 @@ This is the unique token you created within your GMS to allow you to interface w
 
 ```puppet
 token        => 'ABCDEF1234568',
+```
+
+#### token\_file
+The path to a file containing the unique token you created within your GMS to allow you to interface with the system via the API. This is an alternative to, and is mutually exlusive to use of the `token` parameter.
+
+```puppet
+token_file   => '/etc/gitlab/api-token',
 ```
 
 ### Stash mandatory authentication parameters
@@ -294,7 +317,7 @@ repo_name       => 'control',
 
 ### GitHub & Gitlab optional parameters
 
-#### disable\_ssl_verify
+#### disable\_ssl\_verify
 Boolean value for disabling SSL verification for this webhook. **NOTE: Does not work on Stash **
 
 ```puppet
@@ -305,7 +328,7 @@ The gitlab provider sets `enable_ssl_verification` to false when this attribute 
 
 ### GitLab optional Parameters
 
-#### merge\_request_events
+#### merge\_request\_events
 The URL in the webhook_url parameter will be triggered when a merge requests event occurs. **NOTE: GitLab only**
 
 ```puppet

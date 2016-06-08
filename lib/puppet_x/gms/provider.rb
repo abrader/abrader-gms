@@ -13,4 +13,3 @@ module PuppetX::GMS::Provider
     end
   end
 end
-

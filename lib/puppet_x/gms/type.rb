@@ -53,4 +53,3 @@ module PuppetX::GMS::Type
     end
   end
 end
-
