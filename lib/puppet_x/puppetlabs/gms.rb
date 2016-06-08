@@ -36,18 +36,18 @@ module PuppetX
         self.class.calling_method
       end
 
-      def rest_call(action, url, provider, data)
-        self.class.rest_call(action, url, provider, data)
+      def rest_call(action, url, token, provider, data)
+        self.class.rest_call(action, url, token, provider, data)
       end
 
       def self.provider(cm)
         cm.split('/').last.split('.').first
       end
 
-      def self.post(url, data=nil)
+      def self.post(url, token, data=nil)
         if url =~ URI::regexp
           begin
-            self.rest_call('POST', url, provider(caller[0]), data)
+            self.rest_call('POST', url, token, provider(caller[0]), data)
           rescue Exception => e
             fail("puppet_x::puppetlabs::gms.post: Error caught on POST: #{e}")
           end
@@ -56,10 +56,10 @@ module PuppetX
         end
       end
 
-      def self.put(url, data=nil)
+      def self.put(url, token, data=nil)
         if url =~ URI::regexp
           begin
-            self.rest_call('PUT', url, provider(caller[0]), data)
+            self.rest_call('PUT', url, token, provider(caller[0]), data)
           rescue Exception => e
             fail("puppet_x::puppetlabs::gms.put: Error caught on PUT: #{e}")
           end
@@ -68,10 +68,10 @@ module PuppetX
         end
       end
 
-      def self.patch(url, data=nil)
+      def self.patch(url, token, data=nil)
         if url =~ URI::regexp
           begin
-            self.rest_call('PATCH', url, provider(caller[0]), data)
+            self.rest_call('PATCH', url, token, provider(caller[0]), data)
           rescue Exception => e
             fail("puppet_x::puppetlabs::gms.put: Error caught on PATCH: #{e}")
           end
@@ -80,10 +80,10 @@ module PuppetX
         end
       end
 
-      def self.delete(url, data=nil)
+      def self.delete(url, token, data=nil)
         if url =~ URI::regexp
           begin
-            self.rest_call('DELETE', url, provider(caller[0]), data)
+            self.rest_call('DELETE', url, token, provider(caller[0]), data)
           rescue Exception => e
             fail("puppet_x::puppetlabs::gms.delete: Error caught on DELETE: #{e}")
           end
@@ -92,10 +92,10 @@ module PuppetX
         end
       end
 
-      def self.get(url, data=nil)
+      def self.get(url, token, data=nil)
         if url =~ URI::regexp
           begin
-            self.rest_call('GET', url, provider(caller[0]), data)
+            self.rest_call('GET', url, token, provider(caller[0]), data)
           rescue Exception => e
             fail("puppet_x::puppetlabs::gms.get: Error caught on GET: #{e}")
           end
@@ -104,7 +104,7 @@ module PuppetX
         end
       end
 
-      def self.rest_call(action, url, provider, data)
+      def self.rest_call(action, url, token, provider, data)
         # Single method to make all calls to the respective RESTful API
 
         uri = URI.parse(url)
@@ -135,10 +135,12 @@ module PuppetX
         end
 
         if provider =~ /github/i
+
           req.initialize_http_header({'Accept' => 'application/vnd.github.v3+json', 'User-Agent' => 'puppet-gms'})
           req.set_content_type('application/json')
-          if @token && ! @token.empty?
-            req.add_field('Authorization', "token #{@token}")
+
+          if token && ! token.empty?
+            req.add_field('Authorization', "token #{token}")
           elsif @token_file && ! @token_file.empty? && File.exist?(@token_file)
             req.add_field('Authorization', "token #{File.read(@token_file).strip}")
           elsif ENV['GMS_TOKEN']
@@ -146,6 +148,7 @@ module PuppetX
           else
             fail("puppet_x::puppetlabs::gms: Must supply GMS_TOKEN environment variable.")
           end
+
         elsif provider =~ /gitlab/i
           req.set_content_type('application/json')
           req.add_field('PRIVATE-TOKEN', ENV['GMS_TOKEN'].strip)
@@ -170,51 +173,13 @@ module PuppetX
         end
       end
 
-      def url_to_project_name(url)
+      def self.url_to_project_name(url)
         pn_array = url.split('/')
         pn = pn_array[4] + '/' + pn_array[5]
         return pn
       end
 
-      def get_name
-        resource.parameters_with_value.each do |p|
-          if p.name.to_s == 'name'
-            return p.value
-          end
-        end
-        return nil
-      end
-
-      def get_project_name
-        resource.parameters_with_value.each do |p|
-          if p.name.to_s == 'project_name'
-            return p.value
-          end
-        end
-        return nil
-      end
-
-      def get_hook_id
-        resource.parameters_with_value.each do |p|
-          if p.name.to_s == 'hook_id'
-            return p.value
-          end
-        end
-        return nil
-      end
-
-      def get_webhook_url
-        resource.parameters_with_value.each do |p|
-          if p.name.to_s == 'config'
-            return p.value['url']
-          end
-        end
-        return nil
-      end
-
-      def clean_json(params, input_hash)
-        input_hash = JSON.parse(input_hash) if input_hash.class == String
-
+      def sanitize_hash(params, input_hash)
         input_hash.each_key do |key|
           input_hash.delete(key) unless params.include?(key)
         end
@@ -222,26 +187,18 @@ module PuppetX
         return input_hash
       end
 
-      def create_message(hash)
-        # Create the message by stripping :present.
-        new_hash = hash.reject { |k, _| [:ensure, :provider, Puppet::Type.metaparams].flatten.include?(k) }
-
-        return new_hash
-      end
-
       def nest_hash_keys(keys_to_rename, nest_hash, rename_hash)
         rename_hash[nest_hash] = Hash.new if rename_hash[nest_hash].nil?
-
-        Puppet.notice("nhk: rename_hash[nest_hash] = #{rename_hash[nest_hash].inspect}")
 
         keys_to_rename.each do |k, v|
           next if rename_hash[nest_hash][k]
           value = rename_hash[k]
           rename_hash.delete(k)
           if value
-            rename_hash[nest_hash][v] = value
+            rename_hash[nest_hash][v] = value unless rename_hash[nest_hash][v] == value
           end
         end
+
         return rename_hash
       end
 
@@ -266,4 +223,3 @@ module PuppetX
     end
   end
 end
-
