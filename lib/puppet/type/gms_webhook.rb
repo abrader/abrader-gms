@@ -10,16 +10,8 @@ Puppet::Type.newtype(:gms_webhook) do
 
   newparam(:name)
 
-  # newparam(:name, :namevar => true) do
-  #   desc 'A unique title for the key that will be provided to the prefered Git management system. Required.'
-  #
-  #   def insync?(is)
-  #     is == should
-  #   end
-  # end
-
   newproperty(:active) do
-    desc 'TODO'
+    desc 'Boolean to make webhook active or inactive.  GitHub only.'
 
     newvalues(true, false)
   end
@@ -81,21 +73,98 @@ Puppet::Type.newtype(:gms_webhook) do
     desc 'The parameters to be passed along side of the executable that will be triggered when a commit has been made to the repository. Optional. NOTE: Stash only.'
   end
 
-  newproperty(:merge_request_events) do
-    desc 'The URL in the webhook_url parameter will be triggered when a merge request is created. Optional. NOTE: GitLab only'
+  newproperty(:push_events) do
+    desc 'Boolean value for indicating if webhook should be triggered on a push event. GitLab Only.'
+
+    def insync?(is)
+      is.to_s == should.to_s
+    end
+
+    defaultto :false
+    newvalues(:true, :false)
+  end
+
+  newproperty(:issues_events) do
+    desc 'Boolean value for indicating if webhook should be triggered on an issues event. GitLab Only.'
+
+    def insync?(is)
+      is.to_s == should.to_s
+    end
+
+    defaultto :false
+    newvalues(:true, :false)
+  end
+
+  newproperty(:merge_requests_events) do
+    desc 'Boolean value for indicating if webhook should be triggered on a merge requests event. GitLab Only.'
+
+    def insync?(is)
+      is.to_s == should.to_s
+    end
+
+    defaultto :false
+    newvalues(:true, :false)
   end
 
   newproperty(:tag_push_events) do
-    desc 'The URL in the webhook_url parameter will be triggered when a tag push event occurs. Optional. NOTE: GitLab only'
- end
+    desc 'Boolean value for indicating if webhook should be triggered on a tag push event. GitLab Only.'
 
-  newproperty(:issue_events) do
-    desc 'The URL in the webhook_url parameter will be triggered when an issue event occurs. Optional. NOTE: GitLab only.'
+    def insync?(is)
+      is.to_s == should.to_s
+    end
+
+    defaultto :false
+    newvalues(:true, :false)
+  end
+
+  newproperty(:note_events) do
+    desc 'Boolean value for indicating if webhook should be triggered on a note event. GitLab Only.'
+
+    def insync?(is)
+      is.to_s == should.to_s
+    end
+
+    defaultto :false
+    newvalues(:true, :false)
+  end
+
+  newproperty(:build_events) do
+    desc 'Boolean value for indicating if webhook should be triggered on a build event. GitLab Only.'
+
+    def insync?(is)
+      is.to_s == should.to_s
+    end
+
+    defaultto :false
+    newvalues(:true, :false)
+  end
+
+  newproperty(:pipeline_events) do
+    desc 'Boolean value for indicating if webhook should be triggered on a pipeline event. GitLab Only.'
+
+    def insync?(is)
+      is.to_s == should.to_s
+    end
+
+    defaultto :false
+    newvalues(:true, :false)
+  end
+
+  newproperty(:wiki_page_events) do
+    desc 'Boolean value for indicating if webhook should be triggered on a wiki page event. GitLab Only.'
+
+    def insync?(is)
+      is.to_s == should.to_s
+    end
+
+    defaultto :false
+    newvalues(:true, :false)
   end
 
   newproperty(:insecure_ssl) do
     desc 'Boolean value for disabling SSL verification for this webhook. Optional.'
 
+    defaultto :false
     newvalues(:true, :false)
   end
 
