@@ -4,7 +4,7 @@ require 'json'
 require 'puppet_x/gms/provider'
 
 Puppet::Type.type(:git_webhook).provide(:github) do
-  extend PuppetX::GMS::Provider
+  include PuppetX::GMS::Provider
 
   defaultfor :github => :exist
   defaultfor :feature => :posix
