@@ -7,6 +7,8 @@ Status](https://travis-ci.org/abrader/abrader-gms.svg?branch=master)](https://tr
 
 # Git Management Systems API Types & Providers
 
+[![Join the chat at https://gitter.im/abrader/abrader-gms](https://badges.gitter.im/abrader/abrader-gms.svg)](https://gitter.im/abrader/abrader-gms?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 As of right now this repository only covers the following GMS functionality:
 
 ## API functions covered
