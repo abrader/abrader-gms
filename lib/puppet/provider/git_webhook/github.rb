@@ -12,7 +12,7 @@ Puppet::Type.type(:git_webhook).provide(:github) do
   def gms_server
     # Provide the host and port portion of the URL to calling methods
     return resource[:server_url].strip unless resource[:server_url].nil?
-    return 'https://api.github.com'
+    return 'https://github.com/api/v3'
   end
 
   def calling_method
