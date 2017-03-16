@@ -76,7 +76,7 @@ project_name => 'abrader/abrader-gms',
 #### server_url
 The URL path to the Git management system server
 
-Both http & https URLs are acceptable.
+Both http & https URLs are acceptable. For public GitHub, use `https://api.github.com` here
 
 ```puppet
 server_url   => 'http://my.internal.gms.server.example.com',
