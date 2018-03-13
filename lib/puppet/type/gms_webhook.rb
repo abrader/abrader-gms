@@ -1,207 +1,63 @@
-require_relative '../../puppet_x/puppetlabs/property/read_only'
-require 'puppet_x/gms/type'
+require 'puppet/resource_api'
 
-Puppet::Type.newtype(:gms_webhook) do
-  include PuppetX::GMS::Type
-
-  @doc = 'To manage webhooks on major GMS systems.'
-
-  ensurable
-
-  newparam(:name)
-
-  newproperty(:active) do
-    desc 'Boolean to make webhook active or inactive.  GitHub only.'
-
-    newvalues(true, false)
-  end
-
-  newproperty(:webhook_url) do
-    desc 'The URL the webhook will trigger upon a commit to the respective respository. Required. NOTE: GitHub & GitLab only.'
-
-    munge do |value|
-     value.to_s
-    end
-
-    validate do |value|
-      unless value =~ /^(https?:\/\/)?(\S*\:\S*\@)?(\S*)\.?(\S*)\.?(\w*):?(\d*)\/?(\S*)$/
-        raise(Puppet::Error, "Git webhook URL must be fully qualified, not '#{value}'")
-      end
-    end
-  end
-
-  newproperty(:content_type) do
-    desc 'TODO'
-
-    munge do |value|
-     value.to_s
-    end
-  end
-
-  newproperty(:events, :array_matching => :all) do
-    desc 'Events that should trigger the activation of the webhook'
-
-    newvalues("commit_comment", "create", "delete", "deployment", "deployment_status", "fork", "gollum", "issue_comment", "issues", "member", "public", "pull_request", "pull_request_review_comment", "push", "release",  "status", "team_add", "watch")
-
-    def insync?(is)
-      is.to_set == should.to_set
-    end
-  end
-
-  add_parameter_token
-  add_parameter_token_file
-  add_parameter_username
-  add_parameter_password
-
-  newproperty(:project_name) do
-    desc 'The project name associated with the project. Required.'
-
-    munge do |value|
-     value.to_s
-    end
-  end
-
-  newproperty(:repo_name) do
-    desc 'The name of the repository associated with the webhook. Required. NOTE: Stash only.'
-  end
-
-  newproperty(:hook_exe) do
-    desc 'The absolute path to the exectuable triggered when a commit has been made to the respository. Required. NOTE: Stash only.'
-  end
-
-  newproperty(:hook_exe_params) do
-    desc 'The parameters to be passed along side of the executable that will be triggered when a commit has been made to the repository. Optional. NOTE: Stash only.'
-  end
-
-  newproperty(:push_events) do
-    desc 'Boolean value for indicating if webhook should be triggered on a push event. GitLab Only.'
-
-    def insync?(is)
-      is.to_s == should.to_s
-    end
-
-    defaultto :false
-    newvalues(:true, :false)
-  end
-
-  newproperty(:issues_events) do
-    desc 'Boolean value for indicating if webhook should be triggered on an issues event. GitLab Only.'
-
-    def insync?(is)
-      is.to_s == should.to_s
-    end
-
-    defaultto :false
-    newvalues(:true, :false)
-  end
-
-  newproperty(:merge_requests_events) do
-    desc 'Boolean value for indicating if webhook should be triggered on a merge requests event. GitLab Only.'
-
-    def insync?(is)
-      is.to_s == should.to_s
-    end
-
-    defaultto :false
-    newvalues(:true, :false)
-  end
-
-  newproperty(:tag_push_events) do
-    desc 'Boolean value for indicating if webhook should be triggered on a tag push event. GitLab Only.'
-
-    def insync?(is)
-      is.to_s == should.to_s
-    end
-
-    defaultto :false
-    newvalues(:true, :false)
-  end
-
-  newproperty(:note_events) do
-    desc 'Boolean value for indicating if webhook should be triggered on a note event. GitLab Only.'
-
-    def insync?(is)
-      is.to_s == should.to_s
-    end
-
-    defaultto :false
-    newvalues(:true, :false)
-  end
-
-  newproperty(:build_events) do
-    desc 'Boolean value for indicating if webhook should be triggered on a build event. GitLab Only.'
-
-    def insync?(is)
-      is.to_s == should.to_s
-    end
-
-    defaultto :false
-    newvalues(:true, :false)
-  end
-
-  newproperty(:pipeline_events) do
-    desc 'Boolean value for indicating if webhook should be triggered on a pipeline event. GitLab Only.'
-
-    def insync?(is)
-      is.to_s == should.to_s
-    end
-
-    defaultto :false
-    newvalues(:true, :false)
-  end
-
-  newproperty(:wiki_page_events) do
-    desc 'Boolean value for indicating if webhook should be triggered on a wiki page event. GitLab Only.'
-
-    def insync?(is)
-      is.to_s == should.to_s
-    end
-
-    defaultto :false
-    newvalues(:true, :false)
-  end
-
-  newproperty(:insecure_ssl) do
-    desc 'Boolean value for disabling SSL verification for this webhook. Optional.'
-
-    defaultto :false
-    newvalues(:true, :false)
-  end
-
-  newproperty(:server_url) do
-    desc 'The URL path to the Git management system server. Required.'
-
-    validate do |value|
-      unless value =~ /^(https?:\/\/).*:?.*\/?$/
-        raise(Puppet::Error, "Git server URL must be fully qualified, not '#{value}'")
-      end
-    end
-  end
-
-  read_only_properties = {
-    id:                    'id',
-    last_response_code:    'last_response_code',
-    last_response_status:  'last_response_status',
-    last_response_message: 'last_response_message',
-    updated_at:            'updated_at',
-    created_at:            'created_at',
-    rest_url:              'rest_url',
-    test_url:              'test_url',
-    ping_url:              'ping_url',
-  }
-
-  read_only_properties.each do |property, value|
-    newproperty(property, :parent => PuppetX::Property::ReadOnly) do
-      desc "Information related to #{value} from the GitHub v3 API."
-
-      munge do |value|
-       value.to_s
-      end
-    end
-  end
-
-  validate do
-    validate_token_or_token_file
-  end
-
-end
+Puppet::ResourceApi.register_type(
+  name: 'gms_webhook',
+  docs: <<-EOS,
+      This type provides Puppet with the capabilities to manage ...
+    EOS
+  features: [],
+  attributes:   {
+    ensure:      {
+      type:    'Enum[present, absent]',
+      desc:    'Whether this resource should be present or absent on the target system.',
+      default: 'present',
+    },
+    name:        {
+      type:      'String',
+      desc:      'The name of the resource you want to manage.',
+      behaviour: :read_only,
+    },
+    id:          {
+      type:      'Variant[Pattern[/\A(0x)?[0-9a-fA-F]{8}\Z/], Pattern[/\A(0x)?[0-9a-fA-F]{16}\Z/], Pattern[/\A(0x)?[0-9a-fA-F]{40}\Z/]]',
+      desc:      'The ID of the webhook you want to manage.',
+      behaviour: :namevar,
+    },
+    url:      {
+      type:      'Pattern[/\A((hkp|http|https):\/\/)?([a-z\d])([a-z\d-]{0,61}\.)+[a-z\d]+(:\d{2,5})?$/]',
+      desc:      'The Git Management URL to fetch the webhook based on the ID.',
+      behaviour: :read_only,
+    },
+    test_url:      {
+      type:      'Pattern[/\A((hkp|http|https):\/\/)?([a-z\d])([a-z\d-]{0,61}\.)+[a-z\d]+(:\d{2,5})?$/]',
+      desc:      'The Git Management URL to test the webhook based on the ID.',
+      behaviour: :read_only,
+    },
+    ping_url:      {
+      type:      'Pattern[/\A((hkp|http|https):\/\/)?([a-z\d])([a-z\d-]{0,61}\.)+[a-z\d]+(:\d{2,5})?$/]',
+      desc:      'The Git Management URL to ping the webhook based on the ID.',
+      behaviour: :read_only,
+    },
+    events:        {
+      type:      'Array[String]',
+      desc:      'Events that can trigger the webhook',
+    },
+    active:        {
+      type:      'Boolean',
+      desc:      'Setting for if the webhook is currently activated',
+    },
+    config:        {
+      type:      'Hash',
+      desc:      'Configuration settings such as the URL to trigger and the content type',
+    },
+    updated_at:    {
+      type:      'String',
+      desc:      'Indication of when the webhook was last updated',
+      behaviour: :read_only,
+    },
+    created_at:    {
+      type:      'String',
+      desc:      'Indication of when the webhook was created',
+      behaviour: :read_only,
+    },
+  },
+)

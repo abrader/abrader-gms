@@ -1,23 +1,31 @@
-require 'rspec-puppet'
-require 'webmock/rspec'
-require 'vcr'
+require 'puppetlabs_spec_helper/module_spec_helper'
+require 'rspec-puppet-facts'
 
-WebMock.disable_net_connect!
-
-VCR.configure do |c|
-  c.cassette_library_dir = 'fixtures/vcr_cassettes'
-  c.hook_into :webmock
+begin
+  require 'spec_helper_local' if File.file?(File.join(File.dirname(__FILE__), 'spec_helper_local.rb'))
+rescue LoadError => loaderror
+  warn "Could not require spec_helper_local: #{loaderror.message}"
 end
 
-if ENV['PARSER'] == 'future'
-  RSpec.configure do |c|
-    c.parser = 'future'
-  end
+include RspecPuppetFacts
+
+default_facts = {
+  puppetversion: Puppet.version,
+  facterversion: Facter.version,
+}
+
+default_facts_path = File.expand_path(File.join(File.dirname(__FILE__), 'default_facts.yml'))
+default_module_facts_path = File.expand_path(File.join(File.dirname(__FILE__), 'default_module_facts.yml'))
+
+if File.exist?(default_facts_path) && File.readable?(default_facts_path)
+  default_facts.merge!(YAML.safe_load(File.read(default_facts_path)))
 end
 
-fixture_path = File.expand_path(File.join(__FILE__, '..', 'fixtures'))
+if File.exist?(default_module_facts_path) && File.readable?(default_module_facts_path)
+  default_facts.merge!(YAML.safe_load(File.read(default_module_facts_path)))
+end
 
 RSpec.configure do |c|
-  c.module_path = File.join(fixture_path, 'modules')
-  c.manifest_dir = File.join(fixture_path, 'manifests')
+  c.default_facts = default_facts
+  c.mock_with :rspec
 end

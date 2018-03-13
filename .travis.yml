@@ -1,38 +1,48 @@
 ---
+sudo: false
+dist: trusty
 language: ruby
-bundler_args: --without development acceptance
 cache: bundler
+before_install:
+  - bundle -v
+  - rm Gemfile.lock || true
+  - gem update --system
+  - gem update bundler
+  - gem --version
+  - bundle -v
+script:
+  - 'bundle exec rake $CHECK'
+bundler_args: --without system_tests
+rvm:
+  - 2.4.1
+env:
+  - PUPPET_GEM_VERSION="~> 5.0" CHECK=spec
+matrix:
+  fast_finish: true
+  include:
+    -
+      env: CHECK=rubocop
+    -
+      env: CHECK="syntax lint"
+    -
+      env: CHECK=metadata_lint
+    -
+      env: CHECK=spec
+    -
+      env: PUPPET_GEM_VERSION="~> 4.0" CHECK=spec
+      rvm: 2.1.9
 branches:
   only:
     - master
-before_install: rm Gemfile.lock || true
-sudo: false
-script:
-  - "bundle exec rake lint"
-  - "bundle exec rake syntax"
-  - "bundle exec rake spec SPEC_OPTS='--format documentation'"
-rvm:
-  - 1.9.3
-  - 2.0.0
-  - 2.1
-  - 2.2
-env:
-  - PUPPET_VERSION="~> 3.2.0"
-  - PUPPET_VERSION="~> 3.3.0"
-  - PUPPET_VERSION="~> 3.4.0"
-  - PUPPET_VERSION="~> 3.5.1"
-  - PUPPET_VERSION="~> 3.6.0"
-  - PUPPET_VERSION="~> 3.7.0"
-  - PUPPET_VERSION="~> 4.0.0"
-
-global:
-  - PUBLISHER_LOGIN=abrader
-
+    - /^v\d/
 notifications:
   email: false
-  webhooks:
-    urls:
-      - 'https://webhooks.gitter.im/e/16f24db0492933fce79d' 
-    on_success: change
-    on_failure: always
-    on_start: false
+deploy:
+  provider: puppetforge
+  user: puppet
+  password:
+    secure: ""
+  on:
+    tags: true
+    all_branches: true
+    condition: "$DEPLOY_TO_FORGE = yes"
