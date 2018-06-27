@@ -69,7 +69,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     project_id = get_project_id
 
     webhook_hash = Hash.new
-    url = "#{gms_server}/api/v3/projects/#{project_id}/hooks"
+    url = "#{gms_server}/api/v4/projects/#{project_id}/hooks"
 
     response = api_call('GET', url)
 
@@ -99,7 +99,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
 
     project_name = resource[:project_name].strip.sub('/','%2F')
 
-    url = "#{gms_server}/api/v3/projects/#{project_name}"
+    url = "#{gms_server}/api/v4/projects/#{project_name}"
 
     begin
       response = api_call('GET', url)
@@ -116,7 +116,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
 
     webhook_hash = Hash.new
 
-    url = "#{gms_server}/api/v3/projects/#{project_id}/hooks"
+    url = "#{gms_server}/api/v4/projects/#{project_id}/hooks"
 
     response = api_call('GET', url)
 
@@ -138,7 +138,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
   def create
     project_id = get_project_id
 
-    url = "#{gms_server}/api/v3/projects/#{project_id}/hooks"
+    url = "#{gms_server}/api/v4/projects/#{project_id}/hooks"
 
     begin
       opts = { 'url' => resource[:webhook_url].strip }
@@ -181,7 +181,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     webhook_id = get_webhook_id
 
     unless webhook_id.nil?
-      url = "#{gms_server}/api/v3/projects/#{project_id}/hooks/#{webhook_id}"
+      url = "#{gms_server}/api/v4/projects/#{project_id}/hooks/#{webhook_id}"
 
       begin
         response = api_call('DELETE', url)
