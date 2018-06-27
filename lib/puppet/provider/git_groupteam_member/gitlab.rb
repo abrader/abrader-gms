@@ -76,7 +76,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     group_id = get_group_id
 
     groupteam_hash = Hash.new
-    url = "#{gms_server}/api/v3//groups/#{group_id}/members"
+    url = "#{gms_server}/api/v4//groups/#{group_id}/members"
 
     response = api_call('GET', url)
 
@@ -130,7 +130,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
   def get_group_id
     group_hash = Hash.new
 
-    url = "#{gms_server}/api/v3/groups?search=#{resource[:groupteam_name].strip}"
+    url = "#{gms_server}/api/v4/groups?search=#{resource[:groupteam_name].strip}"
 
     response = api_call('GET', url)
 
@@ -153,7 +153,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
   def get_user_id
     group_hash = Hash.new
 
-    url = "#{gms_server}/api/v3/users?search=#{resource[:member_name].strip}"
+    url = "#{gms_server}/api/v4/users?search=#{resource[:member_name].strip}"
 
     response = api_call('GET', url)
 
@@ -178,7 +178,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     group_id = get_group_id
     user_id  = get_user_id
 
-    url = "#{gms_server}/api/v3//groups/#{group_id}/members"
+    url = "#{gms_server}/api/v4//groups/#{group_id}/members"
 
     begin
       if access_level.nil? ||  group_id.nil? || user_id.nil?
@@ -206,7 +206,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     user_id  = get_user_id
 
     unless group_id.nil?
-      url = "#{gms_server}/api/v3//groups/#{group_id}/members/#{user_id}"
+      url = "#{gms_server}/api/v4//groups/#{group_id}/members/#{user_id}"
 
       begin
         response = api_call('DELETE', url)

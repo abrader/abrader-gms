@@ -67,7 +67,7 @@ Puppet::Type.type(:git_groupteam).provide(:gitlab) do
 
   def exists?
     groupteam_hash = Hash.new
-    url = "#{gms_server}/api/v3/groups"
+    url = "#{gms_server}/api/v4/groups"
 
     response = api_call('GET', url)
 
@@ -96,7 +96,7 @@ Puppet::Type.type(:git_groupteam).provide(:gitlab) do
   def get_group_id
     group_hash = Hash.new
 
-    url = "#{gms_server}/api/v3/groups"
+    url = "#{gms_server}/api/v4/groups"
 
     response = api_call('GET', url)
 
@@ -117,7 +117,7 @@ Puppet::Type.type(:git_groupteam).provide(:gitlab) do
   end
 
   def create
-    url = "#{gms_server}/api/v3/groups"
+    url = "#{gms_server}/api/v4/groups"
 
     begin
       opts = { 'name' => resource[:groupteam_name].strip, 'path' => resource[:groupteam_name].strip }
@@ -144,7 +144,7 @@ Puppet::Type.type(:git_groupteam).provide(:gitlab) do
     group_id = get_group_id
 
     unless group_id.nil?
-      url = "#{gms_server}/api/v3/groups/#{group_id}"
+      url = "#{gms_server}/api/v4/groups/#{group_id}"
 
       begin
         response = api_call('DELETE', url)
