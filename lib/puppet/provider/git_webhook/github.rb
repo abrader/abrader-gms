@@ -66,27 +66,55 @@ Puppet::Type.type(:git_webhook).provide(:github) do
 
     Puppet.debug("github_webhook::#{calling_method}: REST API #{req.method} Response: #{response.inspect}")
 
-    response
+    case response
+    when Net::HTTPSuccess then
+      return response
+    when Net::HTTPRedirection then
+      location = response['Location']
+      cookie = response['Set-Cookie']
+      new_uri = URI.parse(location)
+      Puppet.debug("github_webhook::redirect cause: #{url} #{reseponse}")
+      return api_call(action,location,data = nil)
+    else
+      raise(Puppet::Error, "problem with API endoint #{url} #{response}")
+    end
   end
 
   def exists?
     webhook_hash = Hash.new
-    url = "#{gms_server}/repos/#{resource[:project_name].strip}/hooks"
-
-    response = api_call('GET', url)
-    webhook_json = JSON.parse(response.body)
-
-    webhook_json.each do |child|
-      webhook_hash[child['config']['url']] = child['id']
-    end
-
-    webhook_hash.keys.each do |k|
-      if k.eql?(resource[:webhook_url].strip)
-        Puppet.debug "github_webhook::#{calling_method}: Webhook already exists as specified in calling resource block."
-        return true
+    num = 100 #number of hooks per page
+    url = "#{gms_server}/repos/#{resource[:project_name].strip}/hooks?per_page=#{num}"
+    page=1
+    found=false
+    webhook_json = *(0..num)
+    until webhook_json.length() < num
+      # probably have more webhooks
+      local_url="#{url}&page=#{page}"
+      response = api_call('GET', local_url)
+      webhook_json = JSON.parse(response.body)
+      Puppet.debug("github_webhook::page #{page} #{webhook_json.length()} #{local_url}")
+      page = page + 1
+      webhook_json.each do |child|
+        begin
+          webhook_hash[child['config']['url']] = child['id']
+        rescue
+          nil
+        end
       end
+
+      webhook_hash.keys.each do |k|
+        if k.eql?(resource[:webhook_url].strip)
+          Puppet.debug "github_webhook::#{calling_method}: Webhook already exists as specified in calling resource block."
+          found=true
+          return true
+        end
+      end
+
     end
 
+    if found == true
+      return true
+    end
     Puppet.debug "github_webhook::#{calling_method}: Webhook does not currently exist as specified in calling resource block."
     return false
   end
@@ -115,22 +143,31 @@ Puppet::Type.type(:git_webhook).provide(:github) do
   def get_webhook_id
     webhook_hash = Hash.new
 
-    url = "#{gms_server}/repos/#{resource[:project_name]}/hooks"
+    num = 100 #number of hooks per page
+    url = "#{gms_server}/repos/#{resource[:project_name].strip}/hooks?per_page=#{num}"
+    page=1
+    webhook_json = *(0..num)
+    until webhook_json.length() < num
+      # probably have more webhooks
+      local_url="#{url}&page=#{page}"
+      response = api_call('GET', local_url)
+      webhook_json = JSON.parse(response.body)
+      Puppet.debug("github_webhook::page #{page} #{webhook_json.length()} #{local_url}")
+      page = page + 1
+      webhook_json.each do |child|
+        begin
+          webhook_hash[child['config']['url']] = child['id']
+        rescue
+          nil
+        end
+      end
 
-    response = api_call('GET', url)
-
-    webhook_json = JSON.parse(response.body)
-
-    webhook_json.each do |child|
-      webhook_hash[child['config']['url']] = child['id']
-    end
-
-    webhook_hash.each do |k,v|
-      if k.eql?(resource[:webhook_url].strip)
-        return v.to_i
+      webhook_hash.each do |k,v|
+        if k.eql?(resource[:webhook_url].strip)
+          return v.to_i
+        end
       end
     end
-
     return nil
   end
 
@@ -180,7 +217,6 @@ Puppet::Type.type(:git_webhook).provide(:github) do
 
     end
   end
-
 end
 
 
