@@ -1,0 +1,34 @@
+image: "ruby:2.4.5"
+
+cache:
+  paths:
+    - vendor/ruby
+    - spec/fixtures
+
+variables:
+  PUPPET_LOCATION: 4.10.12
+
+before_script:
+  - gem install bundler  --no-document
+  - bundle install -j $(nproc) --path vendor
+
+test-syntax:
+  stage: test
+  script:
+  - bundle exec rake syntax
+
+test-validate:
+  stage: test
+  script:
+  - bundle exec rake validate
+
+test-lint:
+  stage: test
+  script:
+  - bundle exec rake lint
+
+test-rspec:
+  stage: test
+  script:
+  - bundle exec rake spec SPEC_OPTS='--format documentation'
+  coverage: '/Resource coverage: \d+\.\d+/'
