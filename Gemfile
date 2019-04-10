@@ -12,7 +12,7 @@ end
 
 group :test do
   gem 'rake'
-  gem 'puppet', *location_for(ENV['PUPPET_LOCATION'] || '~> 5.5.0')
+  gem 'puppet', *location_for(ENV['PUPPET_LOCATION'] || '~> 3.7.0')
   gem 'puppetlabs_spec_helper'
   gem 'webmock'
   gem 'vcr'
