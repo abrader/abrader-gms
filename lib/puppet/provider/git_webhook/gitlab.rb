@@ -101,7 +101,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
       raise(Puppet::Error, "gitlab_webhook::#{calling_method}: Must provide at least one of the following attributes: project_id or project_name")
     end
 
-    project_name = resource[:project_name].strip.sub('/','%2F')
+    project_name = resource[:project_name].strip.gsub('/','%2F')
 
     url = "#{gms_server}/api/#{api_version}/projects/#{project_name}"
 
