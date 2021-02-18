@@ -13,6 +13,10 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     return 'https://gitlab.com'
   end
 
+  def api_version
+    return resource[:gitlab_api_version]
+  end
+
   def calling_method
     # Get calling method and clean it up for good reporting
     cm = String.new
@@ -69,7 +73,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     project_id = get_project_id
 
     webhook_hash = Hash.new
-    url = "#{gms_server}/api/v3/projects/#{project_id}/hooks"
+    url = "#{gms_server}/api/#{api_version}/projects/#{project_id}/hooks"
 
     response = api_call('GET', url)
 
@@ -97,9 +101,9 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
       raise(Puppet::Error, "gitlab_webhook::#{calling_method}: Must provide at least one of the following attributes: project_id or project_name")
     end
 
-    project_name = resource[:project_name].strip.sub('/','%2F')
+    project_name = resource[:project_name].strip.gsub('/','%2F')
 
-    url = "#{gms_server}/api/v3/projects/#{project_name}"
+    url = "#{gms_server}/api/#{api_version}/projects/#{project_name}"
 
     begin
       response = api_call('GET', url)
@@ -116,7 +120,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
 
     webhook_hash = Hash.new
 
-    url = "#{gms_server}/api/v3/projects/#{project_id}/hooks"
+    url = "#{gms_server}/api/#{api_version}/projects/#{project_id}/hooks"
 
     response = api_call('GET', url)
 
@@ -138,7 +142,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
   def create
     project_id = get_project_id
 
-    url = "#{gms_server}/api/v3/projects/#{project_id}/hooks"
+    url = "#{gms_server}/api/#{api_version}/projects/#{project_id}/hooks"
 
     begin
       opts = { 'url' => resource[:webhook_url].strip }
@@ -181,7 +185,7 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
     webhook_id = get_webhook_id
 
     unless webhook_id.nil?
-      url = "#{gms_server}/api/v3/projects/#{project_id}/hooks/#{webhook_id}"
+      url = "#{gms_server}/api/#{api_version}/projects/#{project_id}/hooks/#{webhook_id}"
 
       begin
         response = api_call('DELETE', url)
@@ -199,5 +203,3 @@ Puppet::Type.type(:git_webhook).provide(:gitlab) do
   end
 
 end
-
-

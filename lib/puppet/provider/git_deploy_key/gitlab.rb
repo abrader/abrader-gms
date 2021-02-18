@@ -13,6 +13,18 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
     return 'https://gitlab.com'
   end
 
+  def api_version
+    return resource[:gitlab_api_version]
+  end
+
+  def keys_endpoint
+    if api_version.to_s.eql? "v3"
+      return 'keys'
+    else
+      return 'deploy_keys'
+    end
+  end
+
   def calling_method
     # Get calling method and clean it up for good reporting
     cm = String.new
@@ -69,7 +81,8 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
     project_id = get_project_id
 
     sshkey_hash = Hash.new
-    url = "#{gms_server}/api/v3/projects/#{project_id}/keys"
+
+    url = "#{gms_server}/api/#{api_version}/projects/#{project_id}/#{keys_endpoint}"
 
     response = api_call('GET', url)
 
@@ -96,9 +109,9 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
       raise(Puppet::Error, "gitlab_deploy_key::#{calling_method}: Must provide at least one of the following attributes: project_id or project_name")
     end
 
-    project_name = resource[:project_name].strip.sub('/','%2F')
+    project_name = resource[:project_name].strip.gsub('/','%2F')
 
-    url = "#{gms_server}/api/v3/projects/#{project_name}"
+    url = "#{gms_server}/api/#{api_version}/projects/#{project_name}"
 
     begin
       response = api_call('GET', url)
@@ -115,7 +128,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
 
     keys_hash = Hash.new
 
-    url = "#{gms_server}/api/v3/projects/#{project_id}/keys"
+    url = "#{gms_server}/api/#{api_version}/projects/#{project_id}/#{keys_endpoint}"
 
     response = api_call('GET', url)
 
@@ -138,7 +151,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
   def create
     project_id = get_project_id
 
-    url = "#{gms_server}/api/v3/projects/#{project_id}/keys"
+    url = "#{gms_server}/api/#{api_version}/projects/#{project_id}/#{keys_endpoint}"
 
     begin
       response = api_call('POST', url, {'title' => resource[:name].strip, 'key' => File.read(resource[:path].strip)})
@@ -159,7 +172,8 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
     key_id = get_key_id
 
     unless key_id.nil?
-      url = "#{gms_server}/api/v3/projects/#{project_id}/keys/#{key_id}"
+
+      url = "#{gms_server}/api/#{api_version}/projects/#{project_id}/#{keys_endpoint}/#{key_id}"
 
       begin
         response = api_call('DELETE', url)
@@ -177,5 +191,3 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
   end
 
 end
-
-

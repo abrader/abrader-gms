@@ -61,6 +61,12 @@ module Puppet
       end
     end
 
+    newparam(:gitlab_api_version) do
+      desc 'The api version to use with gitlab.'
+      defaultto :v4
+      newvalues(:v3, :v4)
+    end
+
     autorequire(:file) do
       self[:path]if self[:path] and Pathname.new(self[:path]).absolute?
     end
@@ -71,4 +77,3 @@ module Puppet
 
   end
 end
-

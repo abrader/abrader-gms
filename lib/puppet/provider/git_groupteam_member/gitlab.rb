@@ -19,6 +19,10 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     return 'https://gitlab.com'
   end
 
+  def api_version
+    return resource[:gitlab_api_version]
+  end
+
   def calling_method
     # Get calling method and clean it up for good reporting
     cm = String.new
@@ -76,7 +80,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     group_id = get_group_id
 
     groupteam_hash = Hash.new
-    url = "#{gms_server}/api/v3//groups/#{group_id}/members"
+    url = "#{gms_server}/api/#{api_version}/groups/#{group_id}/members"
 
     response = api_call('GET', url)
 
@@ -130,7 +134,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
   def get_group_id
     group_hash = Hash.new
 
-    url = "#{gms_server}/api/v3/groups?search=#{resource[:groupteam_name].strip}"
+    url = "#{gms_server}/api/#{api_version}/groups?search=#{resource[:groupteam_name].strip}"
 
     response = api_call('GET', url)
 
@@ -153,7 +157,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
   def get_user_id
     group_hash = Hash.new
 
-    url = "#{gms_server}/api/v3/users?search=#{resource[:member_name].strip}"
+    url = "#{gms_server}/api/#{api_version}/users?search=#{resource[:member_name].strip}"
 
     response = api_call('GET', url)
 
@@ -178,7 +182,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     group_id = get_group_id
     user_id  = get_user_id
 
-    url = "#{gms_server}/api/v3//groups/#{group_id}/members"
+    url = "#{gms_server}/api/#{api_version}/groups/#{group_id}/members"
 
     begin
       if access_level.nil? ||  group_id.nil? || user_id.nil?
@@ -206,7 +210,7 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
     user_id  = get_user_id
 
     unless group_id.nil?
-      url = "#{gms_server}/api/v3//groups/#{group_id}/members/#{user_id}"
+      url = "#{gms_server}/api/#{api_version}//groups/#{group_id}/members/#{user_id}"
 
       begin
         response = api_call('DELETE', url)
@@ -224,5 +228,3 @@ Puppet::Type.type(:git_groupteam_member).provide(:gitlab) do
   end
 
 end
-
-

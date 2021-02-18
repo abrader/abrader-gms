@@ -1,0 +1,61 @@
+---
+cache:
+  paths:
+    - vendor/ruby
+    - spec/fixtures
+
+variables:
+
+.puppet400: &puppet400
+  PUPPET_LOCATION: 4.0.0
+  BUNDLER: '1.7.3'
+
+.puppet41012: &puppet41012
+  PUPPET_LOCATION: 4.10.12
+  BUNDLER: '1.7.3'
+
+.puppet550: &puppet550
+  PUPPET_LOCATION: 5.5.0
+  BUNDLER: '>= 0'
+
+.syntax: &syntax
+  script:
+  - bundle exec rake syntax
+
+.validate: &validate
+  script:
+  - bundle exec rake validate
+
+.lint: &lint
+  script:
+  - bundle exec rake lint
+
+.spec: &spec
+  script:
+  - bundle exec rake spec SPEC_OPTS='--format documentation'
+  coverage: '/Resource coverage: \d+\.\d+/'
+
+before_script:
+  - gem install bundler --no-document --version "$BUNDLER"
+  - bundle install -j $(nproc) --path vendor --without development acceptance
+
+puppet41012_test:
+  stage: test
+  image: "ruby:2.1.9"
+  <<: [*syntax, *validate, *lint, *spec]
+  variables:
+    <<: [*puppet41012]
+
+puppet550_test:
+  image: "ruby:2.4.5"
+  stage: test
+  <<: [*syntax, *validate, *lint, *spec]
+  variables:
+    <<: [*puppet550]
+
+puppet400_test:
+  stage: test
+  image: "ruby:2.1.9"
+  <<: [*syntax, *validate, *lint, *spec]
+  variables:
+    <<: [*puppet400]
