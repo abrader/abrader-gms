@@ -28,7 +28,7 @@ Puppet::Type.type(:gms_webhook).provide(:gitlab, :parent => PuppetX::Puppetlabs:
 
     instances = []
 
-    repos_url = "#{gms_server}/api/v3/projects"
+    repos_url = "#{gms_server}/api/v4/projects"
     repos = get(repos_url, @token)
 
     webhooks = Array.new
@@ -37,7 +37,7 @@ Puppet::Type.type(:gms_webhook).provide(:gitlab, :parent => PuppetX::Puppetlabs:
     repos.each do |r|
 
       # hooks_url = "#{gms_server}/projects/#{r['id']}/hooks"
-      hooks_url = "#{gms_server}/api/v3/projects/#{r['id']}/hooks"
+      hooks_url = "#{gms_server}/api/v4/projects/#{r['id']}/hooks"
 
       hook_objs = get(hooks_url, @token)
 
@@ -137,7 +137,7 @@ Puppet::Type.type(:gms_webhook).provide(:gitlab, :parent => PuppetX::Puppetlabs:
 
   def get_project_id(project_name)
     begin
-      repos_url = "#{self.gms_server}/api/v3/projects"
+      repos_url = "#{self.gms_server}/api/v4/projects"
       repos = PuppetX::Puppetlabs::Gms.get(repos_url, get_token)
 
       repos.each do |r|
@@ -158,7 +158,7 @@ Puppet::Type.type(:gms_webhook).provide(:gitlab, :parent => PuppetX::Puppetlabs:
   def flush
     Puppet.debug("def flush")
 
-    put_url = "#{gms_server}/api/v3/projects/#{get_project_id(resource[:project_name].strip)}/hooks/#{self.id}"
+    put_url = "#{gms_server}/api/v4/projects/#{get_project_id(resource[:project_name].strip)}/hooks/#{self.id}"
 
     if @property_hash != {}
       begin
@@ -179,7 +179,7 @@ Puppet::Type.type(:gms_webhook).provide(:gitlab, :parent => PuppetX::Puppetlabs:
     Puppet.debug('def create')
 
     begin
-      post_url = "#{self.gms_server}/api/v3/projects/#{get_project_id(resource[:project_name].strip)}/hooks"
+      post_url = "#{self.gms_server}/api/v4/projects/#{get_project_id(resource[:project_name].strip)}/hooks"
 
       response = PuppetX::Puppetlabs::Gms.post(post_url, get_token, message(resource))
 
@@ -202,7 +202,7 @@ Puppet::Type.type(:gms_webhook).provide(:gitlab, :parent => PuppetX::Puppetlabs:
     Puppet.debug("def destroy")
 
     unless webhook_id.nil?
-      destroy_url = "#{gms_server}/api/v3/projects/#{get_project_id(resource[:project_name].strip)}/hooks/#{self.id}"
+      destroy_url = "#{gms_server}/api/v4/projects/#{get_project_id(resource[:project_name].strip)}/hooks/#{self.id}"
 
       begin
         response = PuppetX::Puppetlabs::Gms.delete(destroy_url, get_token)

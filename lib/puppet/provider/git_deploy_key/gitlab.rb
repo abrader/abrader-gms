@@ -69,7 +69,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
     project_id = get_project_id
 
     sshkey_hash = Hash.new
-    url = "#{gms_server}/api/v3/projects/#{project_id}/keys"
+    url = "#{gms_server}/api/v4/projects/#{project_id}/keys"
 
     response = api_call('GET', url)
 
