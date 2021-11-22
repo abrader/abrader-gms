@@ -96,7 +96,7 @@ Puppet::Type.type(:git_deploy_key).provide(:gitlab) do
       raise(Puppet::Error, "gitlab_deploy_key::#{calling_method}: Must provide at least one of the following attributes: project_id or project_name")
     end
 
-    project_name = resource[:project_name].strip.sub('/','%2F')
+    project_name = resource[:project_name].strip.gsub('/','%2F')
 
     url = "#{gms_server}/api/v4/projects/#{project_name}"
 
